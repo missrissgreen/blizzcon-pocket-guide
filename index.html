@@ -1,0 +1,1220 @@
+<title>BlizzCon Pocket Guide</title>
+<meta name="description" content="Community-built schedule app for BlizzCon 2026 — browse all sessions, build your personal schedule, set reminders, and add custom events.">
+<meta property="og:title" content="BlizzCon Pocket Guide">
+<meta property="og:description" content="Community-built schedule app for BlizzCon 2026. Browse 80+ sessions, build your personal schedule, and never miss a panel.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://missrissgreen.github.io/blizzcon-pocket-guide/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="BlizzCon Pocket Guide">
+<meta name="twitter:description" content="Community-built schedule app for BlizzCon 2026. Browse 80+ sessions, build your personal schedule, and never miss a panel.">
+<meta name="theme-color" content="#0a0e1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg-primary: #0a0e1a;
+  --bg-secondary: #111827;
+  --bg-card: #1a1f35;
+  --bg-card-hover: #232945;
+  --bg-surface: #0f1325;
+  --text-primary: #f0f0f5;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --border: #2a2f45;
+  --border-light: #374151;
+
+  --wow: #F1C428;
+  --wow-bg: rgba(241,196,40,0.12);
+  --diablo: #CC2200;
+  --diablo-bg: rgba(204,34,0,0.12);
+  --overwatch: #EE7E1F;
+  --overwatch-bg: rgba(238,126,31,0.12);
+  --hearthstone: #2CE6FF;
+  --hearthstone-bg: rgba(44,230,255,0.12);
+  --classic: #9B7FD4;
+  --classic-bg: rgba(155,127,212,0.12);
+  --blizzard: #009AE4;
+  --blizzard-bg: rgba(0,154,228,0.12);
+  --community: #E84393;
+  --community-bg: rgba(232,67,147,0.12);
+  --custom: #22C55E;
+  --custom-bg: rgba(34,197,94,0.12);
+
+  --star: #FFD700;
+  --conflict: #ef4444;
+  --live: #22c55e;
+  --nav-height: 64px;
+  --header-height: 52px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+.display-font { font-family: 'Rajdhani', 'Inter', sans-serif; }
+
+/* App Shell */
+.app-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border);
+  height: var(--header-height);
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 16px;
+}
+.app-header h1 {
+  font-family: 'Rajdhani', 'Inter', sans-serif;
+  font-size: 20px; font-weight: 700;
+  background: linear-gradient(135deg, #009AE4 0%, #00d4ff 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; letter-spacing: 0.12em;
+}
+.app-header .notify-btn {
+  position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: var(--text-secondary); cursor: pointer;
+  font-size: 20px; padding: 4px;
+}
+.app-header .notify-btn.active { color: var(--star); }
+.app-header .search-btn {
+  position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: var(--text-secondary); cursor: pointer;
+  font-size: 18px; padding: 4px;
+}
+
+.app-content {
+  padding-top: var(--header-height);
+  padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px));
+  min-height: 100dvh;
+}
+
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  height: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px));
+}
+.nav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 4px;
+  background: none; border: none; color: var(--text-muted);
+  cursor: pointer; font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  transition: color 0.2s;
+}
+.nav-item.active { color: #009AE4; }
+.nav-item .nav-icon { font-size: 22px; line-height: 1; display: flex; align-items: center; justify-content: center; }
+/* Search overlay */
+.search-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200;
+  background: var(--bg-primary);
+  display: none; flex-direction: column;
+}
+.search-overlay.open { display: flex; }
+.search-bar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 16px; border-bottom: 1px solid var(--border);
+  height: var(--header-height);
+}
+.search-bar input {
+  flex: 1; background: none; border: none; outline: none;
+  color: var(--text-primary); font-size: 16px; font-family: inherit;
+}
+.search-bar input::placeholder { color: var(--text-muted); }
+.search-bar button {
+  background: none; border: none; color: var(--text-secondary);
+  cursor: pointer; font-size: 14px; font-weight: 600; padding: 4px 8px;
+}
+.search-results { flex: 1; overflow-y: auto; padding: 8px 0; }
+
+/* Filters */
+.filters-bar {
+  padding: 12px 16px 8px;
+  display: flex; flex-direction: column; gap: 10px;
+  background: var(--bg-primary);
+  position: sticky; top: var(--header-height); z-index: 50;
+}
+.day-toggle {
+  display: flex; background: var(--bg-secondary); border-radius: 10px;
+  padding: 3px; gap: 2px;
+}
+.day-btn {
+  flex: 1; padding: 10px 12px;
+  background: none; border: none; border-radius: 8px;
+  color: var(--text-secondary);
+  font-family: 'Rajdhani', 'Inter', sans-serif;
+  font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: all 0.2s;
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.day-btn.active {
+  background: #009AE4; color: white;
+  box-shadow: 0 2px 8px rgba(0,154,228,0.3);
+}
+.filter-chips {
+  display: flex; gap: 6px; overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; padding-bottom: 2px;
+}
+.filter-chips::-webkit-scrollbar { display: none; }
+.filter-chip {
+  padding: 6px 14px; border-radius: 20px;
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  color: var(--text-secondary); font-size: 12px; font-weight: 600;
+  white-space: nowrap; cursor: pointer; transition: all 0.2s;
+  flex-shrink: 0;
+}
+.filter-chip.active {
+  border-color: transparent; color: white;
+}
+.filter-chip[data-game="all"].active { background: #374151; border-color: var(--border-light); }
+.filter-chip[data-game="World of warcraft"].active { background: var(--wow); color: #1a1a1a; }
+.filter-chip[data-game="Diablo"].active { background: var(--diablo); }
+.filter-chip[data-game="Overwatch 2"].active { background: var(--overwatch); color: #1a1a1a; }
+.filter-chip[data-game="Hearthstone"].active { background: var(--hearthstone); color: #1a1a1a; }
+.filter-chip[data-game="Classic Cup"].active { background: var(--classic); color: #1a1a1a; }
+.filter-chip[data-game="Blizzard"].active { background: var(--blizzard); }
+.filter-chip[data-game="Community"].active { background: var(--community); }
+.filter-chip[data-game="Custom"].active { background: var(--custom); color: #1a1a1a; }
+
+/* Time group */
+.time-group { margin-bottom: 4px; }
+.time-label {
+  padding: 16px 16px 8px;
+  font-family: 'Rajdhani', 'Inter', sans-serif;
+  font-size: 14px; font-weight: 600; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  position: sticky; top: calc(var(--header-height) + 95px); z-index: 10;
+  background: var(--bg-primary);
+}
+
+/* Session cards */
+.session-card {
+  margin: 4px 12px; padding: 14px 16px;
+  background: var(--bg-card); border-radius: 12px;
+  border-left: 3px solid var(--border);
+  cursor: pointer; transition: all 0.15s;
+  display: flex; align-items: flex-start; gap: 12px;
+  position: relative;
+}
+.session-card:active { transform: scale(0.98); background: var(--bg-card-hover); }
+.session-card.game-wow { border-left-color: var(--wow); }
+.session-card.game-diablo { border-left-color: var(--diablo); }
+.session-card.game-overwatch { border-left-color: var(--overwatch); }
+.session-card.game-hearthstone { border-left-color: var(--hearthstone); }
+.session-card.game-classic { border-left-color: var(--classic); }
+.session-card.game-blizzard { border-left-color: var(--blizzard); }
+.session-card.game-community { border-left-color: var(--community); }
+.session-card.game-custom { border-left-color: var(--custom); }
+
+.session-info { flex: 1; min-width: 0; }
+.session-title {
+  font-family: 'Rajdhani', 'Inter', sans-serif;
+  font-size: 15px; font-weight: 700; line-height: 1.3;
+  margin-bottom: 6px; color: var(--text-primary);
+}
+.session-meta {
+  display: flex; flex-wrap: wrap; gap: 4px 12px;
+  font-size: 12px; color: var(--text-secondary);
+}
+.session-meta span { display: flex; align-items: center; gap: 4px; }
+.session-game-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 4px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.05em; margin-top: 6px;
+}
+.game-wow .session-game-badge { background: var(--wow-bg); color: var(--wow); }
+.game-diablo .session-game-badge { background: var(--diablo-bg); color: var(--diablo); }
+.game-overwatch .session-game-badge { background: var(--overwatch-bg); color: var(--overwatch); }
+.game-hearthstone .session-game-badge { background: var(--hearthstone-bg); color: var(--hearthstone); }
+.game-classic .session-game-badge { background: var(--classic-bg); color: var(--classic); }
+.game-blizzard .session-game-badge { background: var(--blizzard-bg); color: var(--blizzard); }
+.game-community .session-game-badge { background: var(--community-bg); color: var(--community); }
+.game-custom .session-game-badge { background: var(--custom-bg); color: var(--custom); }
+
+.star-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 22px; padding: 4px; flex-shrink: 0;
+  color: var(--text-muted); transition: all 0.2s;
+  line-height: 1;
+}
+.star-btn.starred { color: var(--star); transform: scale(1.1); }
+.star-btn:active { transform: scale(0.85); }
+
+.live-indicator {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 700; color: var(--live);
+  text-transform: uppercase;
+}
+.live-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--live); animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.conflict-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 10px; font-weight: 700; color: var(--conflict);
+  text-transform: uppercase; margin-top: 4px;
+}
+
+/* My Schedule empty state */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 60px 32px; text-align: center;
+  color: var(--text-muted);
+}
+.empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; }
+.empty-state h3 { font-size: 18px; color: var(--text-secondary); margin-bottom: 8px; }
+.empty-state p { font-size: 14px; line-height: 1.5; }
+
+/* Now & Next */
+.now-next-section {
+  padding: 16px; margin: 8px 12px;
+  background: var(--bg-card); border-radius: 16px;
+  border: 1px solid var(--border);
+}
+.now-next-section h2 {
+  font-size: 13px; font-weight: 700; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.1em;
+  margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+}
+.countdown-display {
+  text-align: center; padding: 24px 16px; margin: 8px 12px;
+  background: linear-gradient(135deg, rgba(0,154,228,0.15) 0%, rgba(0,212,255,0.08) 100%);
+  border: 1px solid rgba(0,154,228,0.2); border-radius: 16px;
+}
+.countdown-label {
+  font-size: 12px; font-weight: 600; color: var(--text-secondary);
+  text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;
+}
+.countdown-event {
+  font-size: 16px; font-weight: 700; color: var(--text-primary);
+  margin-bottom: 16px;
+}
+.countdown-timer {
+  display: flex; justify-content: center; gap: 16px;
+}
+.countdown-unit {
+  display: flex; flex-direction: column; align-items: center;
+}
+.countdown-number {
+  font-family: 'Rajdhani', 'Inter', sans-serif;
+  font-size: 40px; font-weight: 700; color: #009AE4;
+  line-height: 1; font-variant-numeric: tabular-nums;
+}
+.countdown-suffix {
+  font-size: 10px; font-weight: 600; color: var(--text-muted);
+  text-transform: uppercase; margin-top: 4px;
+}
+
+/* Detail modal */
+.modal-backdrop {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 300;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+  display: none; align-items: flex-end; justify-content: center;
+}
+.modal-backdrop.open { display: flex; }
+.modal-sheet {
+  background: var(--bg-secondary); border-radius: 20px 20px 0 0;
+  width: 100%; max-width: 500px;
+  max-height: 85dvh; overflow-y: auto;
+  padding: 20px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+  animation: slideUp 0.25s ease-out;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.modal-handle {
+  width: 40px; height: 4px; border-radius: 2px;
+  background: var(--border-light); margin: 0 auto 16px;
+}
+.modal-title { font-family: 'Rajdhani', 'Inter', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 12px; line-height: 1.3; }
+.modal-meta {
+  display: flex; flex-direction: column; gap: 8px;
+  margin-bottom: 16px; font-size: 14px; color: var(--text-secondary);
+}
+.modal-meta span { display: flex; align-items: center; gap: 8px; }
+.modal-desc {
+  font-size: 14px; line-height: 1.6; color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+.modal-notes { margin-bottom: 16px; }
+.modal-notes textarea {
+  width: 100%; box-sizing: border-box; min-height: 60px; max-height: 150px;
+  background: var(--bg-primary); color: var(--text-primary);
+  border: 1px solid var(--border-light); border-radius: 10px;
+  padding: 10px 12px; font-size: 13px; font-family: 'Inter', sans-serif;
+  line-height: 1.5; resize: vertical;
+}
+.modal-notes textarea::placeholder { color: var(--text-muted); }
+.modal-notes textarea:focus { outline: none; border-color: var(--blizzard); }
+.modal-notes-label {
+  font-size: 12px; font-weight: 600; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;
+}
+.note-indicator {
+  font-size: 11px; color: var(--text-muted); margin-top: 4px;
+  display: flex; align-items: center; gap: 4px;
+}
+.modal-actions {
+  display: flex; gap: 10px;
+}
+.modal-actions button {
+  flex: 1; padding: 14px; border-radius: 12px;
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  border: none; transition: all 0.15s;
+}
+.modal-actions button:active { transform: scale(0.97); }
+.btn-star {
+  background: rgba(255,215,0,0.15); color: var(--star);
+  border: 1px solid rgba(255,215,0,0.3) !important;
+}
+.btn-star.starred { background: var(--star); color: #1a1a1a; }
+.btn-close-modal {
+  background: var(--bg-card); color: var(--text-secondary);
+}
+
+/* Notification toast */
+.toast {
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+  background: var(--bg-card); border: 1px solid var(--border);
+  color: var(--text-primary); padding: 12px 20px; border-radius: 12px;
+  font-size: 13px; font-weight: 600; z-index: 400;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  opacity: 0; transition: opacity 0.3s; pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+/* Responsive - larger screens */
+@media (min-width: 600px) {
+  .app-content { max-width: 500px; margin: 0 auto; }
+  .bottom-nav { justify-content: center; }
+  .nav-item { max-width: 120px; }
+}
+
+/* Utility bar */
+.util-bar {
+  display: flex; gap: 8px; padding: 8px 16px 12px;
+}
+.util-btn {
+  flex: 1; padding: 10px 12px; border-radius: 10px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  border: 1px solid var(--border); background: var(--bg-secondary);
+  color: var(--text-secondary); transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.util-btn:active { transform: scale(0.97); }
+.util-btn.danger { border-color: rgba(239,68,68,0.3); color: var(--conflict); }
+.util-btn.primary { border-color: rgba(34,197,94,0.3); color: var(--custom); }
+
+/* Custom event form */
+.custom-form-backdrop {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 300;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+  display: none; align-items: flex-end; justify-content: center;
+}
+.custom-form-backdrop.open { display: flex; }
+.custom-form {
+  background: var(--bg-secondary); border-radius: 20px 20px 0 0;
+  width: 100%; max-width: 500px;
+  max-height: 85dvh; overflow-y: auto;
+  padding: 20px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+  animation: slideUp 0.25s ease-out;
+}
+.custom-form .modal-handle { width: 40px; height: 4px; border-radius: 2px; background: var(--border-light); margin: 0 auto 16px; }
+.custom-form h2 {
+  font-family: 'Rajdhani', 'Inter', sans-serif;
+  font-size: 20px; font-weight: 700; margin-bottom: 16px;
+}
+.form-group { margin-bottom: 14px; }
+.form-group label {
+  display: block; font-size: 12px; font-weight: 600;
+  color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: 0.06em; margin-bottom: 6px;
+}
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%; padding: 12px 14px; border-radius: 10px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  color: var(--text-primary); font-size: 14px; font-family: inherit;
+  outline: none; transition: border-color 0.2s;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  border-color: var(--custom);
+}
+.form-group textarea { resize: vertical; min-height: 60px; }
+.form-row { display: flex; gap: 10px; }
+.form-row .form-group { flex: 1; }
+.form-actions { display: flex; gap: 10px; margin-top: 16px; }
+.form-actions button {
+  flex: 1; padding: 14px; border-radius: 12px;
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  border: none; transition: all 0.15s;
+}
+.form-actions button:active { transform: scale(0.97); }
+.btn-save { background: var(--custom); color: #1a1a1a; }
+.btn-cancel { background: var(--bg-card); color: var(--text-secondary); }
+
+.app-footer {
+  text-align: center; padding: 24px 16px 16px;
+  font-size: 12px; color: var(--text-muted); line-height: 1.6;
+}
+.app-footer a {
+  color: var(--blizzard); text-decoration: none; font-weight: 600;
+}
+.app-footer a:hover { text-decoration: underline; }
+
+/* Utility */
+.hidden { display: none !important; }
+</style>
+
+<div id="app">
+  <header class="app-header">
+    <button class="search-btn" onclick="toggleSearch()" aria-label="Search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="m21 21-4.35-4.35m-5.65-10.65c2.7614 0 5 2.23858 5 5m3 0c0 4.4183-3.5817 8-8 8-4.41828 0-8-3.5817-8-8 0-4.41828 3.58172-8 8-8 4.4183 0 8 3.58172 8 8z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg></button>
+    <h1>BLIZZCON POCKET GUIDE</h1>
+    <button class="notify-btn" id="notifyBtn" onclick="toggleNotifications()" aria-label="Notifications"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="m9.35419 21c.70511.6224 1.63141 1 2.64581 1 1.0145 0 1.9407-.3776 2.6458-1m3.3542-13c0-1.5913-.6321-3.11742-1.7573-4.24264-1.1253-1.12522-2.6514-1.75736-4.2427-1.75736s-3.1174.63214-4.24262 1.75736-1.75736 2.65134-1.75736 4.24264c0 3.0902-.77953 5.206-1.65034 6.6054-.73453 1.1805-1.1018 1.7707-1.08834 1.9354.01492.1823.05354.2518.20045.3608.13269.0984.73082.0984 1.92708.0984h13.22233c1.1962 0 1.7944 0 1.927-.0984.147-.109.1856-.1785.2005-.3608.0135-.1647-.3538-.7549-1.0883-1.9354-.8709-1.3994-1.6504-3.5152-1.6504-6.6054z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg></button>
+  </header>
+
+  <div class="search-overlay" id="searchOverlay">
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search events..." oninput="handleSearch(this.value)" autocomplete="off">
+      <button onclick="toggleSearch()">Cancel</button>
+    </div>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+
+  <main class="app-content">
+    <!-- Schedule Tab -->
+    <div id="tab-schedule" class="tab-panel">
+      <div class="filters-bar">
+        <div class="day-toggle">
+          <button class="day-btn active" data-day="saturday" onclick="setDay('saturday')">SAT SEP 12</button>
+          <button class="day-btn" data-day="sunday" onclick="setDay('sunday')">SUN SEP 13</button>
+        </div>
+        <div class="filter-chips" id="gameFilters"></div>
+      </div>
+      <div id="scheduleList"></div>
+    </div>
+
+    <!-- My Schedule Tab -->
+    <div id="tab-my" class="tab-panel hidden">
+      <div class="filters-bar">
+        <div class="day-toggle">
+          <button class="day-btn active" data-day="all" onclick="setMyDay('all')">Both Days</button>
+          <button class="day-btn" data-day="saturday" onclick="setMyDay('saturday')">Saturday</button>
+          <button class="day-btn" data-day="sunday" onclick="setMyDay('sunday')">Sunday</button>
+        </div>
+      </div>
+      <div class="util-bar">
+        <button class="util-btn primary" onclick="openCustomForm()">+ Add Event</button>
+        <button class="util-btn danger" id="clearAllBtn" onclick="clearAllFavorites()">Clear All</button>
+      </div>
+      <div id="myScheduleList"></div>
+    </div>
+
+    <!-- Now & Next Tab -->
+    <div id="tab-now" class="tab-panel hidden">
+      <div id="nowNextContent"></div>
+    </div>
+    <div class="app-footer">
+      Made by someone who really likes spreadsheets and organization and was really annoyed that the BlizzCon app didn't exist anymore. Shared with the community because surely she's not the only one.<br>
+      <a href="https://ko-fi.com/missrissgreen" target="_blank" rel="noopener">Support on Ko-fi</a>
+    </div>
+  </main>
+
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-tab="schedule" onclick="switchTab('schedule')">
+      <span class="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="m21 10h-18m13-8v4m-8-4v4m-.2 16h8.4c1.6802 0 2.5202 0 3.162-.327.5645-.2876 1.0234-.7465 1.311-1.311.327-.6418.327-1.4818.327-3.162v-8.4c0-1.68016 0-2.52024-.327-3.16197-.2876-.56449-.7465-1.02343-1.311-1.31105-.6418-.32698-1.4818-.32698-3.162-.32698h-8.4c-1.68016 0-2.52024 0-3.16197.32698-.56449.28762-1.02343.74656-1.31105 1.31105-.32698.64173-.32698 1.48181-.32698 3.16197v8.4c0 1.6802 0 2.5202.32698 3.162.28762.5645.74656 1.0234 1.31105 1.311.64173.327 1.48181.327 3.16197.327z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg></span>
+      <span>Schedule</span>
+    </button>
+    <button class="nav-item" data-tab="my" onclick="switchTab('my')">
+      <span class="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="m11.2827 3.45332c.2304-.46694.3457-.70041.5021-.77501.1361-.0649.2943-.0649.4304 0 .1565.0746.2717.30807.5022.77501l2.1867 4.42996c.068.13785.102.20678.1517.2603.0441.04738.0969.08577.1555.11304.0663.0308.1423.04192.2944.06415l4.8913.71494c.5151.07528.7726.11292.8918.23873.1037.10945.1524.25986.1327.40933-.0227.17181-.2091.35343-.582.71663l-3.5381 3.446c-.1102.1074-.1654.1612-.201.2251-.0315.0565-.0517.1187-.0595.183-.0088.0726.0042.1485.0302.3002l.8349 4.8674c.088.5134.132.7701.0493.9224-.072.1325-.1999.2255-.3482.253-.1705.0316-.401-.0897-.862-.3321l-4.3727-2.2996c-.1363-.0716-.2044-.1074-.2762-.1215-.0635-.0125-.1289-.0125-.1924 0-.0718.0141-.1399.0499-.2761.1215l-4.37278 2.2996c-.461.2424-.69151.3637-.86195.3321-.14829-.0275-.27625-.1205-.34823-.253-.08274-.1523-.03871-.409.04933-.9224l.83482-4.8674c.02602-.1517.03904-.2276.03023-.3002-.0078-.0643-.02801-.1265-.05951-.183-.03559-.0639-.09073-.1177-.20102-.2251l-3.53803-3.446c-.3729-.3632-.55935-.54482-.58203-.71663-.01974-.14947.02902-.29988.13272-.40933.11919-.12581.37672-.16345.89179-.23873l4.89127-.71494c.15211-.02223.22817-.03335.29441-.06415.05864-.02727.11144-.06566.15547-.11304.04972-.05352.08374-.12245.15178-.2603z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg></span>
+      <span>My Schedule</span>
+    </button>
+    <button class="nav-item" data-tab="now" onclick="switchTab('now')">
+      <span class="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="m12 9.5v4l2.5 1.5m-2.5-10c-4.69442 0-8.5 3.80558-8.5 8.5 0 4.6944 3.80558 8.5 8.5 8.5 4.6944 0 8.5-3.8056 8.5-8.5 0-4.69442-3.8056-8.5-8.5-8.5zm0 0v-3m-2 0h4m6.329 3.59204-1.5-1.5.75.75m-15.90798.75 1.5-1.5-.75.75" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg></span>
+      <span>Now &amp; Next</span>
+    </button>
+  </nav>
+
+  <div class="modal-backdrop" id="modalBackdrop" onclick="closeModal(event)">
+    <div class="modal-sheet" id="modalSheet"></div>
+  </div>
+
+  <div class="custom-form-backdrop" id="customFormBackdrop" onclick="if(event.target===this)closeCustomForm()">
+    <div class="custom-form">
+      <div class="modal-handle"></div>
+      <h2>Add Custom Event</h2>
+      <div class="form-group">
+        <label>Event Name</label>
+        <input type="text" id="customTitle" placeholder="e.g. Guild meetup at the fountain">
+      </div>
+      <div class="form-group">
+        <label>Day</label>
+        <select id="customDay">
+          <option value="saturday">Saturday, Sep 12</option>
+          <option value="sunday">Sunday, Sep 13</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Start Time</label>
+          <input type="time" id="customStart" value="12:00">
+        </div>
+        <div class="form-group">
+          <label>End Time</label>
+          <input type="time" id="customEnd" value="13:00">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Location (optional)</label>
+        <input type="text" id="customLocation" placeholder="e.g. Grand Plaza, Hall B">
+      </div>
+      <div class="form-group">
+        <label>Notes (optional)</label>
+        <textarea id="customNotes" placeholder="Any details you want to remember"></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="btn-save" onclick="saveCustomEvent()">Save Event</button>
+        <button class="btn-cancel" onclick="closeCustomForm()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+// ── Schedule Data ──
+const RAW_SESSIONS = [{"id":"blt470d0e8669062d8e","title":"OPENING CEREMONY","description":"The big event. Announcements, trailers, cinematics, cheers for the Alliance and Horde, and 7,000+ people all packed into Hall D. Don't forget to wear deodorant.","startTime":"2026-09-12T17:30:00.000Z","endTime":"2026-09-12T18:45:00.000Z","game":"Blizzard","streamUrl":"","vodUrl":"","stage":"Main Stage","stageLocation":"Hall D","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"blt141c9911ade5b170","title":"World of Warcraft: What's Next","description":"Join the World of Warcraft team for a first look at the next chapter of Azeroth, with new adventures, features, and surprises for players old and new.","startTime":"2026-09-12T19:00:00.000Z","endTime":"2026-09-12T19:45:00.000Z","game":"World of warcraft","streamUrl":"","vodUrl":"","stage":"Main Stage","stageLocation":"Hall D","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"bltcd167437837eaf39","title":"Diablo: Developer Update","description":"The Diablo team takes the stage for a conversation about the ideas, craft, and ambition shaping the franchise.","startTime":"2026-09-12T20:45:00.000Z","endTime":"2026-09-12T21:30:00.000Z","game":"Diablo","streamUrl":"","vodUrl":"","stage":"Main Stage","stageLocation":"Hall D","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"blta7181be8deca968f","title":"World of Warcraft: What's Next II","description":"Discover what's ahead for World of Warcraft as the development team previews upcoming adventures, features, and updates.","startTime":"2026-09-12T21:45:00.000Z","endTime":"2026-09-12T22:30:00.000Z","game":"World of warcraft","streamUrl":"","vodUrl":"","stage":"Main Stage","stageLocation":"Hall D","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"bltb5b26b37aa8dde18","title":"Overwatch: Hero Deep Dive","description":"Join Overwatch developers for a behind-the-scenes look at the creation of a new Hero, plus a preview of upcoming gameplay updates.","startTime":"2026-09-12T22:45:00.000Z","endTime":"2026-09-12T23:30:00.000Z","game":"Overwatch 2","streamUrl":"","vodUrl":"","stage":"Main Stage","stageLocation":"Hall D","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"blt897d0abfbf8aa14d","title":"BlizzCon Community Night","description":"Celebrate the creativity and artistry of the Blizzard community with an evening of live entertainment featuring contests, special guests, and shared moments.","startTime":"2026-09-12T23:45:00.000Z","endTime":"2026-09-13T02:00:00.000Z","game":"Community","streamUrl":"","vodUrl":"","stage":"Main Stage","stageLocation":"Hall D","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"blt115e9af7bb1369b3","title":"TrailerCraft","description":"Ever wonder how Blizzard's gameplay trailers come together? Join the Blizzard Video team for a behind-the-scenes look at the creative process, tools, and techniques used to transform in-game moments into the trailers that debut Blizzard's biggest announcements and updates.","startTime":"2026-09-12T20:00:00.000Z","endTime":"2026-09-12T20:45:00.000Z","game":"Blizzard","streamUrl":"","vodUrl":"","stage":"Legends Stage","stageLocation":"Second Floor","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"blt2af1a2ccc6bc8c67","title":"Overwatch Dev Livestream: Live from BlizzCon!","description":"Join Overwatch developers live from BlizzCon for a conversation about storytelling, world building, and the ideas behind the game's evolving universe.","startTime":"2026-09-12T19:00:00.000Z","endTime":"2026-09-12T19:45:00.000Z","game":"Overwatch 2","streamUrl":"","vodUrl":"","stage":"Legends Stage","stageLocation":"Second Floor","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"blt5d9761db9940cbda","title":"Building Cutscenes in World of Warcraft","description":"Watch Blizzard artists build a World of Warcraft cutscene, tracing the process from storyboards and performance through animation, lighting, and final polish.","startTime":"2026-09-12T21:00:00.000Z","endTime":"2026-09-12T21:45:00.000Z","game":"World of warcraft","streamUrl":"","vodUrl":"","stage":"Legends Stage","stageLocation":"Second Floor","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"bltaad2f683ab9a3f5c","title":"The World of Blizzard Sound Design","description":"Hear Blizzard audio teams reveal how creature voices, combat effects, and environments combine to make fantastic worlds feel alive.","startTime":"2026-09-12T22:00:00.000Z","endTime":"2026-09-12T23:00:00.000Z","game":"Blizzard","streamUrl":"","vodUrl":"","stage":"Legends Stage","stageLocation":"Second Floor","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"blt8b1c77ca7947c1d6","title":"The Art of Darkness: Behind Diablo IV's Cinematics","description":"Join the Diablo IV cinematic team for a behind-the-scenes look at the visual storytelling, performance, animation, and craft behind Sanctuary's darkest moments.","startTime":"2026-09-12T23:15:00.000Z","endTime":"2026-09-13T00:15:00.000Z","game":"Diablo","streamUrl":"","vodUrl":"","stage":"Legends Stage","stageLocation":"Second Floor","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"bltfddcee1f09cd9861","title":"Kinda Funny Live from BlizzCon","description":"Kinda Funny brings its signature mix of games, conversation, and audience interaction to BlizzCon for a live show celebrating Blizzard and its community.","startTime":"2026-09-13T00:30:00.000Z","endTime":"2026-09-13T01:30:00.000Z","game":"Blizzard","streamUrl":"","vodUrl":"","stage":"Legends Stage","stageLocation":"Second Floor","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"bltfce27f106a22e4a1","title":"Overwatch World Cup Quarterfinals 1","description":"Watch the Overwatch World Cup quarterfinalists battle for a place in the next round.","startTime":"2026-09-12T19:00:00.000Z","endTime":"2026-09-12T20:30:00.000Z","game":"Overwatch 2","streamUrl":"","vodUrl":"","stage":"Overwatch World Cup Arena","stageLocation":"Arena","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"blt48da184cd3463778","title":"Overwatch World Cup Quarterfinals 2","description":"Watch the Overwatch World Cup quarterfinalists battle for a place in the next round.","startTime":"2026-09-12T20:30:00.000Z","endTime":"2026-09-12T22:00:00.000Z","game":"Overwatch 2","streamUrl":"","vodUrl":"","stage":"Overwatch World Cup Arena","stageLocation":"Arena","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"blt1c717c43c4068044","title":"Overwatch World Cup Quarterfinals 3","description":"Watch the Overwatch World Cup quarterfinalists battle for a place in the next round.","startTime":"2026-09-12T22:00:00.000Z","endTime":"2026-09-12T23:30:00.000Z","game":"Overwatch 2","streamUrl":"","vodUrl":"","stage":"Overwatch World Cup Arena","stageLocation":"Arena","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"bltbd55f5862b548504","title":"Overwatch World Cup Quarterfinals 4","description":"Watch the Overwatch World Cup quarterfinalists battle for a place in the next round.","startTime":"2026-09-12T23:30:00.000Z","endTime":"2026-09-13T01:00:00.000Z","game":"Overwatch 2","streamUrl":"","vodUrl":"","stage":"Overwatch World Cup Arena","stageLocation":"Arena","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"blt406c417f081612eb","title":"Overwatch Art & Collaboration Deep Dive","description":"Soe welcomes developers and special guests for a behind-the-scenes look at new Overwatch art, storytelling, and collaboration.","startTime":"2026-09-13T01:15:00.000Z","endTime":"2026-09-13T02:00:00.000Z","game":"Overwatch 2","streamUrl":"","vodUrl":"","stage":"Overwatch World Cup Arena","stageLocation":"Arena","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"blt7c80f94e6b583c3a","title":"MDI 2026 Grand Finals | Dignitas vs Big Lucky","description":"Watch Dignitas and Big Lucky battle for a place in the MDI Grand Final.","startTime":"2026-09-12T19:45:00.000Z","endTime":"2026-09-12T21:00:00.000Z","game":"World of warcraft","streamUrl":"","vodUrl":"","stage":"World of Warcraft Stage","stageLocation":"Hall C","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"blt7d63d1bf323f8ca0","title":"MDI 2026 Grand Finals | Liquid vs Mandatory","description":"Watch Liquid and Mandatory battle for a place in the MDI Grand Final.","startTime":"2026-09-12T21:00:00.000Z","endTime":"2026-09-12T22:15:00.000Z","game":"World of warcraft","streamUrl":"","vodUrl":"","stage":"World of Warcraft Stage","stageLocation":"Hall C","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"bltcc10ec75a25e7144","title":"World of Warcraft: Developer x Creator Showcase","description":"Join creators and World of Warcraft developers for live gameplay, conversation, and community fun.","startTime":"2026-09-12T22:30:00.000Z","endTime":"2026-09-13T00:30:00.000Z","game":"World of warcraft","streamUrl":"","vodUrl":"","stage":"World of Warcraft Stage","stageLocation":"Hall C","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"blt81a146079fd96b82","title":"MDI 2026 Grand Finals | Championship Match","description":"Watch the final teams race to become Mythic Dungeon International 2026 Champions.","startTime":"2026-09-13T00:30:00.000Z","endTime":"2026-09-13T02:15:00.000Z","game":"World of warcraft","streamUrl":"","vodUrl":"","stage":"World of Warcraft Stage","stageLocation":"Hall C","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"blt5f3e739fddae6b78","title":"Hearthstone World Championship Quarterfinals","description":"The Hearthstone World Championship opens with the first two quarterfinal matches as players fight for their spot in the top 4.","startTime":"2026-09-12T19:00:00.000Z","endTime":"2026-09-12T20:30:00.000Z","game":"Hearthstone","streamUrl":"","vodUrl":"","stage":"Hearthstone Stage","stageLocation":"Hall B","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"blt9a88953f839d2661","title":"Hearthstone World Championship Quarterfinals","description":"The Hearthstone World Championship opens with the first two quarterfinal matches as players fight for their spot in the top 4.","startTime":"2026-09-12T20:30:00.000Z","endTime":"2026-09-12T21:45:00.000Z","game":"Hearthstone","streamUrl":"","vodUrl":"","stage":"Hearthstone Stage","stageLocation":"Hall B","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"bltbcbae199afca27a2","title":"Hearthstone: What's Next","description":"Join the Hearthstone team for a look at the game's future, including fresh cards, features, and new ways to play.","startTime":"2026-09-12T22:00:00.000Z","endTime":"2026-09-12T22:45:00.000Z","game":"Hearthstone","streamUrl":"","vodUrl":"","stage":"Hearthstone Stage","stageLocation":"Hall B","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"blta7b6f5c1320c7b0e","title":"Hearthstone World Championship Quarterfinals","description":"The Hearthstone World Championship quarterfinals continue with two more elimination matches that will determine the last semifinal spots.","startTime":"2026-09-12T22:45:00.000Z","endTime":"2026-09-13T00:00:00.000Z","game":"Hearthstone","streamUrl":"","vodUrl":"","stage":"Hearthstone Stage","stageLocation":"Hall B","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"blte1f24a4e54b9cb23","title":"Hearthstone World Championship Quarterfinals","description":"The Hearthstone World Championship quarterfinals continue with two more elimination matches that will determine the last semifinal spots.","startTime":"2026-09-13T00:00:00.000Z","endTime":"2026-09-13T01:15:00.000Z","game":"Hearthstone","streamUrl":"","vodUrl":"","stage":"Hearthstone Stage","stageLocation":"Hall B","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"blta13ac01f6f434962","title":"Drawstone: Murloc Draw Along","description":"Draw along with a Hearthstone artist as they bring a cheerful Murloc to life, sharing creative techniques and tips from first sketch to final details.","startTime":"2026-09-13T01:30:00.000Z","endTime":"2026-09-13T02:00:00.000Z","game":"Hearthstone","streamUrl":"","vodUrl":"","stage":"Hearthstone Stage","stageLocation":"Hall B","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"blta34a683441f2b70f","title":"Classic Cup: Heroes of the Storm - Legacy Match","description":"Heroes of the Storm teams Dignitas and Gen.G return to the BlizzCon Stage for a rematch of the 2018 Global Championship Finals. Join us for a showcase match celebrating the strategy, teamwork, and unforgettable moments of Blizzard's team brawler.","startTime":"2026-09-12T19:00:00.000Z","endTime":"2026-09-12T21:15:00.000Z","game":"Classic Cup","streamUrl":"","vodUrl":"","stage":"Classic Cup Stage","stageLocation":"Hall A","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"bltb95128bfd35d17e5","title":"Custodians of Legacy Games","description":"Meet the developers and community champions who preserve, support, and celebrate Blizzard's legacy games for new generations of players.","startTime":"2026-09-12T21:30:00.000Z","endTime":"2026-09-12T22:15:00.000Z","game":"Classic Cup","streamUrl":"","vodUrl":"","stage":"Classic Cup Stage","stageLocation":"Hall A","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"blt78e80b6f54295970","title":"Classic Game Deep Dive","description":"Join the team for a closer look at the content and design ideas shaping a classic Blizzard game.","startTime":"2026-09-12T22:30:00.000Z","endTime":"2026-09-12T23:15:00.000Z","game":"Classic Cup","streamUrl":"","vodUrl":"","stage":"Classic Cup Stage","stageLocation":"Hall A","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"blt81729b522255db13","title":"Classic Cup: Warcraft III - Legacy Match","description":"Decorated Warcraft III champions TeD and ToD, look to settle old scores. Join us for a showcase match celebrating the strategy, rivalries, and legacy of Azeroth's iconic real-time strategy game.","startTime":"2026-09-12T23:30:00.000Z","endTime":"2026-09-13T00:45:00.000Z","game":"Classic Cup","streamUrl":"","vodUrl":"","stage":"Classic Cup Stage","stageLocation":"Hall A","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"blt5467223dffbb4c3d","title":"Classic Cup: Warcraft III - Entertainment Match","description":"Warcraft Creator Ahmpy and Warcraft III developer Brad Chan team up with champions TeD and ToD for a Warcraft III showcase 2v2 match. Join us to see which creative strategies rule day.","startTime":"2026-09-13T00:45:00.000Z","endTime":"2026-09-13T01:45:00.000Z","game":"Classic Cup","streamUrl":"","vodUrl":"","stage":"Classic Cup Stage","stageLocation":"Hall A","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"blt866e8b2d9302b39b","title":"Diablo Immortal Boss Gauntlet Tournament (In-Room Experience Only)","description":"","startTime":"2026-09-12T19:00:00.000Z","endTime":"2026-09-13T02:00:00.000Z","game":"Diablo","streamUrl":"","vodUrl":"","stage":"Diablo Immortal Arena","stageLocation":"Hall B","day":"saturday","dayLabel":"12 Sep Saturday"},{"id":"bltb1b5d5b2b8f4d0d8","title":"World of Warcraft: Deep Dive","description":"Go deeper with the World of Warcraft team for a guided look at the systems, adventures, and design ideas shaping the next journey through Azeroth.","startTime":"2026-09-13T17:00:00.000Z","endTime":"2026-09-13T17:45:00.000Z","game":"World of warcraft","streamUrl":"","vodUrl":"","stage":"Main Stage","stageLocation":"Hall D","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"bltb2350edae6f4bd94","title":"Diablo IV: What's Next","description":"Celebrate 30 years of darkness with the Diablo development team through previews of upcoming content, features, and more.","startTime":"2026-09-13T18:00:00.000Z","endTime":"2026-09-13T18:45:00.000Z","game":"Diablo","streamUrl":"","vodUrl":"","stage":"Main Stage","stageLocation":"Hall D","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt1ce9de186fd7338c","title":"QuestWatch: Live!!!","description":"Overwatch takes the stage live as Matt Mercer leads fellow OW Voice Actors on a TTRPG adventure through the world of QuestWatch!!!","startTime":"2026-09-13T19:00:00.000Z","endTime":"2026-09-13T21:00:00.000Z","game":"Overwatch 2","streamUrl":"","vodUrl":"","stage":"Main Stage","stageLocation":"Hall D","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt5a650bd9283a0492","title":"World of Warcraft: Design Deep Dive","description":"Join developers of World of Warcraft as they give a closer look at the design process.","startTime":"2026-09-13T21:15:00.000Z","endTime":"2026-09-13T22:00:00.000Z","game":"World of warcraft","streamUrl":"","vodUrl":"","stage":"Main Stage","stageLocation":"Hall D","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"bltd16940317f29ff72","title":"Voices of Blizzard","description":"Hear the voices behind beloved Blizzard characters share stories from the booth, revisit memorable performances, and bring favorite moments to life on stage.","startTime":"2026-09-13T22:15:00.000Z","endTime":"2026-09-14T00:30:00.000Z","game":"Blizzard","streamUrl":"","vodUrl":"","stage":"Main Stage","stageLocation":"Hall D","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt2ecb18f93f26706f","title":"Closing Remarks","description":"Blizzard President Johanna Faries closes out BlizzCon 2026 from the main stage with reflections on the weekend and a final thank-you to the community.","startTime":"2026-09-14T00:30:00.000Z","endTime":"2026-09-14T00:45:00.000Z","game":"Blizzard","streamUrl":"","vodUrl":"","stage":"Main Stage","stageLocation":"Hall D","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"bltb23f5a52a99c87b7","title":"Live Performance: LE SSERAFIM (IN-ROOM EXPERIENCE ONLY)","description":"LE SSERAFIM takes the BlizzCon stage for a live performance celebrating the group's latest collaboration with Overwatch. Musical performances will not be livestreamed and are exclusive to in-person attendees.","startTime":"2026-09-14T01:00:00.000Z","endTime":"2026-09-14T02:00:00.000Z","game":"Blizzard","streamUrl":"","vodUrl":"","stage":"Main Stage","stageLocation":"Hall D","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blta7deaca03411479c","title":"30 Years of Battle.net with Special Guest CD Projekt Red","description":"Celebrate three decades of Battle.net with the people who built and evolved the platform, from connecting early Blizzard players to supporting today's global communities.","startTime":"2026-09-13T16:30:00.000Z","endTime":"2026-09-13T17:30:00.000Z","game":"Blizzard","streamUrl":"","vodUrl":"","stage":"Legends Stage","stageLocation":"Second Floor","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt0b81e886b6b8983b","title":"World of Warcraft Housing: Crafting Coziness and Creative Freedom","description":"World of Warcraft's Housing Devs share how the housing system evolved into a sandbox for creative freedom and player expression","startTime":"2026-09-13T17:45:00.000Z","endTime":"2026-09-13T18:30:00.000Z","game":"World of warcraft","streamUrl":"","vodUrl":"","stage":"Legends Stage","stageLocation":"Second Floor","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"bltd1088097a412b3bb","title":"World Building in World of Warcraft","description":"Join world builders from the World of Warcraft development teams as they unpack the craft of building memorable worlds, from cultures and geography to visual language, history, and the details that make a setting feel lived in.","startTime":"2026-09-13T18:45:00.000Z","endTime":"2026-09-13T19:30:00.000Z","game":"World of warcraft","streamUrl":"","vodUrl":"","stage":"Legends Stage","stageLocation":"Second Floor","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt462282ace862748c","title":"Villains of Blizzard","description":"The Lore team breaks down the most memorable Blizzard villains and learn how motivation, performance, visual design, and gameplay turn an antagonist into an icon.","startTime":"2026-09-13T19:45:00.000Z","endTime":"2026-09-13T20:45:00.000Z","game":"Blizzard","streamUrl":"","vodUrl":"","stage":"Legends Stage","stageLocation":"Second Floor","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"bltedba371899ced327","title":"Collaborative Storytelling in SFD","description":"Panelists from SFD's Creative Development group share experiences and insights into how collaborative creation helps build the stories behind Blizzard's signature epic cinematics.","startTime":"2026-09-13T21:00:00.000Z","endTime":"2026-09-13T21:45:00.000Z","game":"Blizzard","streamUrl":"","vodUrl":"","stage":"Legends Stage","stageLocation":"Second Floor","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt011b122c6bd4ac4a","title":"OW Dev Livestream: Live from BlizzCon!","description":"Join Overwatch developers for a live conversation about inclusive character creation and building a world where more players can see themselves.","startTime":"2026-09-13T22:00:00.000Z","endTime":"2026-09-13T22:45:00.000Z","game":"Overwatch 2","streamUrl":"","vodUrl":"","stage":"Legends Stage","stageLocation":"Second Floor","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"bltc4e9a88962d8b368","title":"Localization: Bringing Blizzard's Worlds Together","description":"Blizzard localization teams reveal how writing, performance, humor, and cultural context are adapted to bring the same unforgettable experience to players around the world.","startTime":"2026-09-13T23:00:00.000Z","endTime":"2026-09-13T23:45:00.000Z","game":"Blizzard","streamUrl":"","vodUrl":"","stage":"Legends Stage","stageLocation":"Second Floor","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt832ceb84ccba19b7","title":"Overwatch World Cup Semifinals 1","description":"The Overwatch World Cup semifinalists face off with a place in the championship match on the line.","startTime":"2026-09-13T16:00:00.000Z","endTime":"2026-09-13T17:45:00.000Z","game":"Overwatch 2","streamUrl":"","vodUrl":"","stage":"Overwatch World Cup Arena","stageLocation":"Arena","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"bltb73cfd4289a47720","title":"Overwatch World Cup Semifinals 2","description":"The Overwatch World Cup semifinalists face off with a place in the championship match on the line.","startTime":"2026-09-13T17:45:00.000Z","endTime":"2026-09-13T19:15:00.000Z","game":"Overwatch 2","streamUrl":"","vodUrl":"","stage":"Overwatch World Cup Arena","stageLocation":"Arena","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt37a6329b634322fc","title":"Overwatch World Cup Halftime Show: Yoasobi (IN-ROOM EXPERIENCE ONLY)","description":"The first ever Overwatch World Cup Halftime show, featuring Japanese musical duo Yoasobi and presented by Sally Amaki. Musical performances will not be livestreamed and are exclusive to in-person attendees.","startTime":"2026-09-13T19:15:00.000Z","endTime":"2026-09-13T20:15:00.000Z","game":"Overwatch 2","streamUrl":"","vodUrl":"","stage":"Overwatch World Cup Arena","stageLocation":"Arena","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"bltb8b097dcb1ecbc9c","title":"Overwatch World Cup Third-Place Match","description":"Watch two teams compete for third place at the Overwatch World Cup.","startTime":"2026-09-13T20:15:00.000Z","endTime":"2026-09-13T21:45:00.000Z","game":"Overwatch 2","streamUrl":"","vodUrl":"","stage":"Overwatch World Cup Arena","stageLocation":"Arena","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt1f2cdcd1b72e0a9a","title":"Overwatch World Cup Finals","description":"The final two teams of the tournament face off in the Overwatch World Cup Finals to determine our 2026 Champion.","startTime":"2026-09-13T21:45:00.000Z","endTime":"2026-09-13T23:45:00.000Z","game":"Overwatch 2","streamUrl":"","vodUrl":"","stage":"Overwatch World Cup Arena","stageLocation":"Arena","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt5c9b1556c80c3d66","title":"Trophy Ceremony","description":"","startTime":"2026-09-13T23:45:00.000Z","endTime":"2026-09-14T00:00:00.000Z","game":"Overwatch 2","streamUrl":"","vodUrl":"","stage":"Overwatch World Cup Arena","stageLocation":"Arena","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt40f5384688153cbd","title":"Post Show","description":"","startTime":"2026-09-14T00:00:00.000Z","endTime":"2026-09-14T00:15:00.000Z","game":"Overwatch 2","streamUrl":"","vodUrl":"","stage":"Overwatch World Cup Arena","stageLocation":"Arena","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt3e394c848996efed","title":"AWC 2026 Grand Finals | F Tier vs Guild Bean","description":"Watch the Arena World Championship quarterfinalists compete for a place in the semifinals.","startTime":"2026-09-13T17:45:00.000Z","endTime":"2026-09-13T19:00:00.000Z","game":"World of warcraft","streamUrl":"","vodUrl":"","stage":"World of Warcraft Stage","stageLocation":"Hall C","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt51a7d54937f4b4d1","title":"AWC 2026 Grand Finals | Streamerzonegg vs One Lun Travel","description":"Watch the Arena World Championship quarterfinalists compete for a place in the semifinals.","startTime":"2026-09-13T19:00:00.000Z","endTime":"2026-09-13T20:00:00.000Z","game":"World of warcraft","streamUrl":"","vodUrl":"","stage":"World of Warcraft Stage","stageLocation":"Hall C","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt692d8e8f2e72b928","title":"World of Warcraft: Art Design","description":"See how World of Warcraft artists enhance familiar landscapes while preserving the spirit of Azeroth.","startTime":"2026-09-13T20:15:00.000Z","endTime":"2026-09-13T21:00:00.000Z","game":"World of warcraft","streamUrl":"","vodUrl":"","stage":"World of Warcraft Stage","stageLocation":"Hall C","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blta39d90b95fec9065","title":"AWC 2026 Grand Finals | Echo vs TBD","description":"Watch the Arena World Championship semifinalists battle for a place in the Grand Finals.","startTime":"2026-09-13T21:00:00.000Z","endTime":"2026-09-13T22:00:00.000Z","game":"World of warcraft","streamUrl":"","vodUrl":"","stage":"World of Warcraft Stage","stageLocation":"Hall C","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt1953fe4396f41699","title":"AWC 2026 Grand Finals | Gators Back vs TBD","description":"Watch the Arena World Championship semifinalists battle for a place in the Grand Finals.","startTime":"2026-09-13T22:00:00.000Z","endTime":"2026-09-13T23:00:00.000Z","game":"World of warcraft","streamUrl":"","vodUrl":"","stage":"World of Warcraft Stage","stageLocation":"Hall C","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt27fac418c553e650","title":"World of Warcraft Hardcore: What's Next","description":"Join World of Warcraft developers for a discussion of Hardcore design, community stories, hard-earned lessons, and surviving Azeroth with one life.","startTime":"2026-09-13T23:15:00.000Z","endTime":"2026-09-14T00:00:00.000Z","game":"World of warcraft","streamUrl":"","vodUrl":"","stage":"World of Warcraft Stage","stageLocation":"Hall C","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt63b360610cdf3468","title":"AWC 2026 Grand Finals | Championship Match","description":"The best remaining Arena teams meet in the Arena World Championship Grand Finals to determine the BlizzCon champion.","startTime":"2026-09-14T00:00:00.000Z","endTime":"2026-09-14T01:30:00.000Z","game":"World of warcraft","streamUrl":"","vodUrl":"","stage":"World of Warcraft Stage","stageLocation":"Hall C","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt637fd6ece75cc246","title":"Trophy Ceremony","description":"Trophy Ceremony","startTime":"2026-09-14T01:30:00.000Z","endTime":"2026-09-14T01:45:00.000Z","game":"World of warcraft","streamUrl":"","vodUrl":"","stage":"World of Warcraft Stage","stageLocation":"Hall C","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt8de30ed5e1437644","title":"Hearthstone World Championship Semifinals","description":"The final four Hearthstone competitors face off for a place in the World Championship match.","startTime":"2026-09-13T16:45:00.000Z","endTime":"2026-09-13T20:00:00.000Z","game":"Hearthstone","streamUrl":"","vodUrl":"","stage":"Hearthstone Stage","stageLocation":"Hall B","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt85b2725cb93d51fa","title":"Hearthstone World Championship Finals","description":"The last two competitors meet in the Hearthstone World Championship final to crown a BlizzCon champion.","startTime":"2026-09-13T20:00:00.000Z","endTime":"2026-09-13T21:45:00.000Z","game":"Hearthstone","streamUrl":"","vodUrl":"","stage":"Hearthstone Stage","stageLocation":"Hall B","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"bltd880255e0b965ec9","title":"Trophy Ceremony","description":"","startTime":"2026-09-13T21:45:00.000Z","endTime":"2026-09-13T22:00:00.000Z","game":"Hearthstone","streamUrl":"","vodUrl":"","stage":"Hearthstone Stage","stageLocation":"Hall B","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt26355e26c4173424","title":"Hearthstone: Battlegrounds Design","description":"Join the Battlegrounds team for a closer look at upcoming updates and the ideas shaping the mode's future.","startTime":"2026-09-13T22:15:00.000Z","endTime":"2026-09-13T23:00:00.000Z","game":"Hearthstone","streamUrl":"","vodUrl":"","stage":"Hearthstone Stage","stageLocation":"Hall B","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt8f76b829b02e65be","title":"Drawstone: Card Back Art Demo","description":"Join a Hearthstone artist for a live demonstration exploring how they approach designing a card back, from initial concept and composition to color, detail, and final polish.","startTime":"2026-09-13T23:15:00.000Z","endTime":"2026-09-14T00:00:00.000Z","game":"Hearthstone","streamUrl":"","vodUrl":"","stage":"Hearthstone Stage","stageLocation":"Hall B","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt5142765270b75b3e","title":"RSL Revival: Season 6 Finals","description":"Seven weeks of online competition culminate on the BlizzCon Stage. Join us for a battle of Zerg's finest, where Serral and Rogue look to stake their claim as the best player in the world.","startTime":"2026-09-13T16:00:00.000Z","endTime":"2026-09-13T18:30:00.000Z","game":"Classic Cup","streamUrl":"","vodUrl":"","stage":"Classic Cup Stage","stageLocation":"Hall A","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"bltfc56ae621212013a","title":"Classic Cup: StarCraft II - Legacy Match","description":"StarCraft II champions IdrA and MC rekindle one of Wings of Liberty's greatest rivalries. Join us for a showcase match celebrating some of the players and maps that shaped a generation of esports.","startTime":"2026-09-13T18:30:00.000Z","endTime":"2026-09-13T20:15:00.000Z","game":"Classic Cup","streamUrl":"","vodUrl":"","stage":"Classic Cup Stage","stageLocation":"Hall A","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt425d925037cb67a2","title":"Classic Cup: StarCraft II - Entertainment Match","description":"Simu Liu, Serral, Rogue, and a mystery guest team up with champions IdrA and MC for a StarCraft II showcase 3v3 match. Join us for a wild combination of skill and personality to see who prevails.","startTime":"2026-09-13T20:15:00.000Z","endTime":"2026-09-13T21:15:00.000Z","game":"Classic Cup","streamUrl":"","vodUrl":"","stage":"Classic Cup Stage","stageLocation":"Hall A","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt8e2e2803b1c33bb0","title":"Classic Cup: StarCraft Remastered - Entertainment Match","description":"Classic Cup Captains Tasteless and Artosis take the stage as competitors to team up with Hall of Famers BoxeR and Nal_rA for a StarCraft Remastered showcase 2v2 match. Join us for a celebration of inventive play and the enduring energy of Brood War.","startTime":"2026-09-13T21:15:00.000Z","endTime":"2026-09-13T22:15:00.000Z","game":"Classic Cup","streamUrl":"","vodUrl":"","stage":"Classic Cup Stage","stageLocation":"Hall A","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt85c86faa1f0d97f5","title":"Classic Cup: StarCraft Remastered - Legacy Match","description":"Esports Hall of Famers BoxeR and Nal_rA grace the BlizzCon stage for an unforgettable StarCraft Remastered showcase match. Join us for a battle between legends of esports in one of its foundational titles","startTime":"2026-09-13T22:15:00.000Z","endTime":"2026-09-13T23:45:00.000Z","game":"Classic Cup","streamUrl":"","vodUrl":"","stage":"Classic Cup Stage","stageLocation":"Hall A","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt730bfa8cfbaad188","title":"Trophy Ceremony","description":"Trophy Ceremony","startTime":"2026-09-13T23:45:00.000Z","endTime":"2026-09-14T00:00:00.000Z","game":"Classic Cup","streamUrl":"","vodUrl":"","stage":"Classic Cup Stage","stageLocation":"Hall A","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt17e12ec66c78d076","title":"Diablo Immortal Live Artist Drawing with Special Guest","description":"Join the Diablo Immortal art team and a special guest for a live drawing session with conversation around the creative process behind bringing unforgettable characters and worlds to life in Diablo.","startTime":"2026-09-13T17:00:00.000Z","endTime":"2026-09-13T18:00:00.000Z","game":"Diablo","streamUrl":"","vodUrl":"","stage":"Diablo Immortal Arena","stageLocation":"Hall B","day":"sunday","dayLabel":"13 Sep Sunday"},{"id":"blt98fc006830e1e65d","title":"Diablo Immortal Boss Gauntlet Tournament (In-Room Experience Only)","description":"","startTime":"2026-09-13T18:15:00.000Z","endTime":"2026-09-14T01:00:00.000Z","game":"Diablo","streamUrl":"","vodUrl":"","stage":"Diablo Immortal Arena","stageLocation":"Hall B","day":"sunday","dayLabel":"13 Sep Sunday"}];
+
+// ── Community Hub Events ──
+const COMMUNITY_EVENTS = [
+  {"id":"comm-safe-haven","title":"Safe Haven Café: Recharge & Connect with Blizzard Leaders","description":"Take a break and join a café-style networking experience with Blizzard leaders whose experiences as mothers have shaped how they lead, grow, and care for others.","startTime":"2026-09-12T19:00:00.000Z","endTime":"2026-09-12T19:45:00.000Z","game":"Community","streamUrl":"","vodUrl":"","stage":"Unknown","stageLocation":"Anaheim Convention Center","day":"saturday","dayLabel":"12 Sep Saturday"},
+  {"id":"comm-sketch-sound","title":"From Sketch to Sound: Asian Artistry in Overwatch","description":"Peek behind the curtain and explore the art of character creation with concept artists from Blizzard's Korean studio and special guest Sally Amaki.","startTime":"2026-09-12T20:00:00.000Z","endTime":"2026-09-12T20:45:00.000Z","game":"Community","streamUrl":"","vodUrl":"","stage":"Inclusion Nexus","stageLocation":"Level 2","day":"saturday","dayLabel":"12 Sep Saturday"},
+  {"id":"comm-hs-beyond","title":"Hearthstone Beyond the Cards","description":"Go behind the scenes with Asian developers from the Hearthstone team and content creator TrumpSC as they share their career journeys and perspectives.","startTime":"2026-09-12T21:00:00.000Z","endTime":"2026-09-12T21:45:00.000Z","game":"Community","streamUrl":"","vodUrl":"","stage":"Inclusion Nexus","stageLocation":"Level 2","day":"saturday","dayLabel":"12 Sep Saturday"},
+  {"id":"comm-cosplay-photo","title":"Cosplay Fountain Photo","description":"Join fellow cosplay community members at the Grand Plaza fountain for the Cosplay Fountain Photo.","startTime":"2026-09-12T22:00:00.000Z","endTime":"2026-09-12T22:30:00.000Z","game":"Community","streamUrl":"","vodUrl":"","stage":"Grand Plaza Fountain","stageLocation":"Outside","day":"saturday","dayLabel":"12 Sep Saturday"},
+  {"id":"comm-trivia","title":"Every Story Shapes the Game Trivia Challenge","description":"Put your knowledge to the test in an interactive trivia experience celebrating the people, perspectives, and creativity that shape Blizzard.","startTime":"2026-09-12T22:15:00.000Z","endTime":"2026-09-12T23:00:00.000Z","game":"Community","streamUrl":"","vodUrl":"","stage":"Inclusion Nexus","stageLocation":"Level 2","day":"saturday","dayLabel":"12 Sep Saturday"},
+  {"id":"comm-power-presence","title":"Power in Presence: Showing Up Authentically","description":"Explore how diverse perspectives, lived experiences, and authentic voices help shape the characters, worlds, and stories we bring to life.","startTime":"2026-09-12T23:15:00.000Z","endTime":"2026-09-13T00:15:00.000Z","game":"Community","streamUrl":"","vodUrl":"","stage":"Inclusion Nexus","stageLocation":"Level 2","day":"saturday","dayLabel":"12 Sep Saturday"},
+  {"id":"comm-career-gaming","title":"Breaking Into a Career in Gaming","description":"Hear from Blizzard professionals as they share their career journeys, lessons learned, and practical advice for breaking into the games industry.","startTime":"2026-09-13T17:00:00.000Z","endTime":"2026-09-13T17:45:00.000Z","game":"Community","streamUrl":"","vodUrl":"","stage":"Inclusion Nexus","stageLocation":"Level 2","day":"sunday","dayLabel":"13 Sep Sunday"},
+  {"id":"comm-roundtable","title":"Power-Up Roundtable Conversations","description":"Connect with Blizzard employees from across disciplines in small-group conversations about careers, creativity, and life at Blizzard.","startTime":"2026-09-13T18:15:00.000Z","endTime":"2026-09-13T19:00:00.000Z","game":"Community","streamUrl":"","vodUrl":"","stage":"Inclusion Nexus","stageLocation":"Level 2","day":"sunday","dayLabel":"13 Sep Sunday"},
+  {"id":"comm-murloc-station","title":"Murloc Station: Get Ready to March","description":"Celebrate one of BlizzCon's fan-favorite traditions at Murloc Station. Get into the mood with coloring activities and temporary tattoos before the March of the Murlocs.","startTime":"2026-09-13T19:00:00.000Z","endTime":"2026-09-13T20:00:00.000Z","game":"Community","streamUrl":"","vodUrl":"","stage":"Inclusion Nexus","stageLocation":"Level 2","day":"sunday","dayLabel":"13 Sep Sunday"},
+  {"id":"comm-march-murlocs","title":"March of the Murlocs","description":"MRRGLRLGLR! Put on your Murloc gear and gather with fellow Murloc fans for this longstanding BlizzCon tradition.","startTime":"2026-09-13T19:00:00.000Z","endTime":"2026-09-13T19:30:00.000Z","game":"Community","streamUrl":"","vodUrl":"","stage":"Arena Plaza","stageLocation":"Outside","day":"sunday","dayLabel":"13 Sep Sunday"},
+  {"id":"comm-women-azeroth","title":"Bringing the Women of Azeroth to Life","description":"Go behind the scenes with women from the World of Warcraft team as they explore how female characters are thoughtfully imagined, written, designed, and brought to life.","startTime":"2026-09-13T20:15:00.000Z","endTime":"2026-09-13T21:00:00.000Z","game":"Community","streamUrl":"","vodUrl":"","stage":"Inclusion Nexus","stageLocation":"Level 2","day":"sunday","dayLabel":"13 Sep Sunday"},
+  {"id":"comm-roundtable-2","title":"Power-Up Roundtable: Continue the Conversation","description":"Connect with Blizzard employees and fellow attendees through a roundtable conversation. Explore career paths, ask questions, and build meaningful connections.","startTime":"2026-09-13T21:30:00.000Z","endTime":"2026-09-13T22:15:00.000Z","game":"Community","streamUrl":"","vodUrl":"","stage":"Community Hub","stageLocation":"Convention Center","day":"sunday","dayLabel":"13 Sep Sunday"},
+  {"id":"comm-games-everyone","title":"Building Games for Everyone","description":"Hear how developers across Blizzard weave accessibility and inclusive design into the development process to create experiences that welcome players around the world.","startTime":"2026-09-13T22:30:00.000Z","endTime":"2026-09-13T23:15:00.000Z","game":"Community","streamUrl":"","vodUrl":"","stage":"Inclusion Nexus","stageLocation":"Level 2","day":"sunday","dayLabel":"13 Sep Sunday"}
+];
+
+// ── Custom Events from localStorage ──
+function loadCustomEvents() {
+  try {
+    const saved = localStorage.getItem('blizzcon-custom-events');
+    return saved ? JSON.parse(saved) : [];
+  } catch(e) { return []; }
+}
+function saveCustomEvents(events) {
+  try { localStorage.setItem('blizzcon-custom-events', JSON.stringify(events)); } catch(e) {}
+}
+
+// ── Merge & Deduplicate ──
+function buildSessionList() {
+  const all = [...RAW_SESSIONS, ...COMMUNITY_EVENTS, ...loadCustomEvents()];
+  const sessions = [];
+  const seenIds = new Map();
+  all.forEach(s => {
+    const key = s.id + '|' + s.day;
+    if (seenIds.has(key)) {
+      const existing = seenIds.get(key);
+      if (!existing._allStages) existing._allStages = [existing.stage + ' (' + existing.stageLocation + ')'];
+      existing._allStages.push(s.stage + ' (' + s.stageLocation + ')');
+    } else {
+      const session = {...s, _uid: s.id + '|' + s.stage + '|' + s.day};
+      seenIds.set(key, session);
+      sessions.push(session);
+    }
+  });
+  return sessions;
+}
+let SESSIONS = buildSessionList();
+
+const GAMES = ['all', 'World of warcraft', 'Diablo', 'Overwatch 2', 'Hearthstone', 'Classic Cup', 'Blizzard', 'Community', 'Custom'];
+const GAME_LABELS = { 'all': 'All', 'World of warcraft': 'WoW', 'Diablo': 'Diablo', 'Overwatch 2': 'Overwatch', 'Hearthstone': 'Hearthstone', 'Classic Cup': 'Classic', 'Blizzard': 'Blizzard', 'Community': 'Community', 'Custom': 'Custom' };
+
+function gameClass(game) {
+  const map = { 'World of warcraft': 'wow', 'Diablo': 'diablo', 'Overwatch 2': 'overwatch', 'Hearthstone': 'hearthstone', 'Classic Cup': 'classic', 'Blizzard': 'blizzard', 'Community': 'community', 'Custom': 'custom' };
+  return 'game-' + (map[game] || 'blizzard');
+}
+
+// ── State ──
+let state = {
+  tab: 'schedule',
+  day: 'saturday',
+  myDay: 'all',
+  gameFilter: 'all',
+  favorites: new Set(),
+  notificationsEnabled: false,
+  notificationTimers: {},
+  notes: {}
+};
+
+function loadFavorites() {
+  try {
+    const saved = localStorage.getItem('blizzcon-favorites');
+    if (saved) state.favorites = new Set(JSON.parse(saved));
+  } catch(e) {}
+}
+function saveFavorites() {
+  try {
+    localStorage.setItem('blizzcon-favorites', JSON.stringify([...state.favorites]));
+  } catch(e) {}
+}
+
+function loadNotes() {
+  try {
+    const saved = localStorage.getItem('blizzcon-notes');
+    if (saved) state.notes = JSON.parse(saved);
+  } catch(e) {}
+}
+function saveNote(uid, text) {
+  if (text.trim()) { state.notes[uid] = text.trim(); }
+  else { delete state.notes[uid]; }
+  try { localStorage.setItem('blizzcon-notes', JSON.stringify(state.notes)); } catch(e) {}
+}
+
+// ── Time formatting ──
+const timeFmt = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit', hour12: true });
+const dayTimeFmt = new Intl.DateTimeFormat(undefined, { weekday: 'short', hour: 'numeric', minute: '2-digit', hour12: true });
+
+function formatTime(iso) { return timeFmt.format(new Date(iso)); }
+function formatDayTime(iso) { return dayTimeFmt.format(new Date(iso)); }
+function formatTimeRange(start, end) { return formatTime(start) + ' – ' + formatTime(end); }
+
+function isLive(session) {
+  const now = Date.now();
+  return now >= new Date(session.startTime).getTime() && now < new Date(session.endTime).getTime();
+}
+function isPast(session) { return Date.now() >= new Date(session.endTime).getTime(); }
+function timeUntil(iso) {
+  const diff = new Date(iso).getTime() - Date.now();
+  if (diff <= 0) return null;
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  return { h, m, s, total: diff };
+}
+
+// ── Conflict detection ──
+function getConflicts(uid) {
+  const session = SESSIONS.find(s => s._uid === uid);
+  if (!session) return [];
+  const start = new Date(session.startTime).getTime();
+  const end = new Date(session.endTime).getTime();
+  return SESSIONS.filter(s =>
+    s._uid !== uid && state.favorites.has(s._uid) &&
+    new Date(s.startTime).getTime() < end && new Date(s.endTime).getTime() > start
+  );
+}
+
+// ── Render helpers ──
+function renderCard(session, opts = {}) {
+  const starred = state.favorites.has(session._uid);
+  const live = isLive(session);
+  const past = isPast(session);
+  const conflicts = starred ? getConflicts(session._uid) : [];
+  const stageLabel = session._allStages ? 'All Stages' : session.stage;
+  const locationLabel = session._allStages ? '' : session.stageLocation;
+
+  return `<div class="session-card ${gameClass(session.game)} ${past ? 'past' : ''}" onclick="openDetail('${session._uid}')" style="${past ? 'opacity:0.5' : ''}">
+    <div class="session-info">
+      ${live ? '<span class="live-indicator"><span class="live-dot"></span>LIVE NOW</span>' : ''}
+      <div class="session-title">${session.title}</div>
+      <div class="session-meta">
+        <span>\u{1F552} ${formatTimeRange(session.startTime, session.endTime)}</span>
+        <span>\u{1F4CD} ${stageLabel}${locationLabel ? ' · ' + locationLabel : ''}</span>
+      </div>
+      <span class="session-game-badge">${GAME_LABELS[session.game] || session.game}</span>
+      ${conflicts.length ? `<div class="conflict-badge">⚠️ Conflicts with ${conflicts.length} event${conflicts.length > 1 ? 's' : ''}</div>` : ''}
+      ${state.notes[session._uid] ? '<div class="note-indicator">📝 Note</div>' : ''}
+    </div>
+    <button class="star-btn ${starred ? 'starred' : ''}" onclick="event.stopPropagation(); toggleFavorite('${session._uid}')" aria-label="${starred ? 'Remove from' : 'Add to'} favorites">
+      ${starred ? '★' : '☆'}
+    </button>
+  </div>`;
+}
+
+// ── Tab switching ──
+function switchTab(tab) {
+  state.tab = tab;
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+  document.getElementById('tab-' + tab).classList.remove('hidden');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.tab === tab));
+  if (tab === 'schedule') renderSchedule();
+  else if (tab === 'my') renderMySchedule();
+  else if (tab === 'now') renderNowNext();
+}
+
+// ── Schedule view ──
+function setDay(day) {
+  state.day = day;
+  document.querySelectorAll('#tab-schedule .day-btn').forEach(b => b.classList.toggle('active', b.dataset.day === day));
+  renderSchedule();
+}
+
+function setGameFilter(game) {
+  state.gameFilter = game;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.toggle('active', c.dataset.game === game));
+  renderSchedule();
+}
+
+function renderGameFilters() {
+  const container = document.getElementById('gameFilters');
+  const hasCustom = loadCustomEvents().length > 0;
+  const visibleGames = GAMES.filter(g => g !== 'Custom' || hasCustom);
+  container.innerHTML = visibleGames.map(g =>
+    `<button class="filter-chip ${g === state.gameFilter ? 'active' : ''}" data-game="${g}" onclick="setGameFilter('${g}')">${GAME_LABELS[g]}</button>`
+  ).join('');
+}
+
+function renderSchedule() {
+  const filtered = SESSIONS.filter(s => {
+    if (s.day !== state.day) return false;
+    if (state.gameFilter !== 'all' && s.game !== state.gameFilter) return false;
+    return true;
+  }).sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+
+  const groups = new Map();
+  filtered.forEach(s => {
+    const key = formatTime(s.startTime);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(s);
+  });
+
+  const container = document.getElementById('scheduleList');
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">\u{1F50D}</div><h3>No events found</h3><p>Try changing your filters</p></div>';
+    return;
+  }
+
+  let html = '';
+  groups.forEach((sessions, time) => {
+    html += `<div class="time-group"><div class="time-label">${time}</div>`;
+    sessions.forEach(s => html += renderCard(s));
+    html += '</div>';
+  });
+  container.innerHTML = html;
+}
+
+// ── My Schedule ──
+function setMyDay(day) {
+  state.myDay = day;
+  document.querySelectorAll('#tab-my .day-btn').forEach(b => b.classList.toggle('active', b.dataset.day === day));
+  renderMySchedule();
+}
+
+function renderMySchedule() {
+  const favSessions = SESSIONS.filter(s => state.favorites.has(s._uid))
+    .filter(s => state.myDay === 'all' || s.day === state.myDay)
+    .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+
+  const container = document.getElementById('myScheduleList');
+  if (favSessions.length === 0) {
+    container.innerHTML = `<div class="empty-state">
+      <div class="empty-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none"><path d="m11.2827 3.45332c.2304-.46694.3457-.70041.5021-.77501.1361-.0649.2943-.0649.4304 0 .1565.0746.2717.30807.5022.77501l2.1867 4.42996c.068.13785.102.20678.1517.2603.0441.04738.0969.08577.1555.11304.0663.0308.1423.04192.2944.06415l4.8913.71494c.5151.07528.7726.11292.8918.23873.1037.10945.1524.25986.1327.40933-.0227.17181-.2091.35343-.582.71663l-3.5381 3.446c-.1102.1074-.1654.1612-.201.2251-.0315.0565-.0517.1187-.0595.183-.0088.0726.0042.1485.0302.3002l.8349 4.8674c.088.5134.132.7701.0493.9224-.072.1325-.1999.2255-.3482.253-.1705.0316-.401-.0897-.862-.3321l-4.3727-2.2996c-.1363-.0716-.2044-.1074-.2762-.1215-.0635-.0125-.1289-.0125-.1924 0-.0718.0141-.1399.0499-.2761.1215l-4.37278 2.2996c-.461.2424-.69151.3637-.86195.3321-.14829-.0275-.27625-.1205-.34823-.253-.08274-.1523-.03871-.409.04933-.9224l.83482-4.8674c.02602-.1517.03904-.2276.03023-.3002-.0078-.0643-.02801-.1265-.05951-.183-.03559-.0639-.09073-.1177-.20102-.2251l-3.53803-3.446c-.3729-.3632-.55935-.54482-.58203-.71663-.01974-.14947.02902-.29988.13272-.40933.11919-.12581.37672-.16345.89179-.23873l4.89127-.71494c.15211-.02223.22817-.03335.29441-.06415.05864-.02727.11144-.06566.15547-.11304.04972-.05352.08374-.12245.15178-.2603z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg></div>
+      <h3>No favorites yet</h3>
+      <p>Tap the star on any event to add it to your personal schedule. Or add a custom event to keep track of guild meet-ups, cosplay photoshoots, community events, medication reminders, nudges to drink water... Literally whatever you want.</p>
+    </div>`;
+    return;
+  }
+
+  const groups = new Map();
+  favSessions.forEach(s => {
+    const key = s.day === 'saturday' ? 'Saturday, Sep 12' : 'Sunday, Sep 13';
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(s);
+  });
+
+  let html = '';
+  groups.forEach((sessions, dayLabel) => {
+    if (state.myDay === 'all') html += `<div class="time-label" style="position:static; font-size:14px; color:var(--text-secondary);">${dayLabel}</div>`;
+    sessions.forEach(s => html += renderCard(s));
+  });
+  container.innerHTML = html;
+
+}
+
+// ── Now & Next ──
+function renderNowNext() {
+  const now = Date.now();
+  const favSessions = SESSIONS.filter(s => state.favorites.has(s._uid))
+    .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+
+  const liveFavs = favSessions.filter(s => isLive(s));
+  const upcomingFavs = favSessions.filter(s => new Date(s.startTime).getTime() > now);
+  const nextFav = upcomingFavs[0];
+
+  const liveAll = SESSIONS.filter(s => isLive(s));
+
+  let html = '';
+
+  // Countdown to next favorited event
+  if (nextFav) {
+    const until = timeUntil(nextFav.startTime);
+    html += `<div class="countdown-display">
+      <div class="countdown-label">Next in your schedule</div>
+      <div class="countdown-event">${nextFav.title}</div>
+      <div class="countdown-timer">
+        ${until.h > 0 ? `<div class="countdown-unit"><span class="countdown-number">${until.h}</span><span class="countdown-suffix">hr</span></div>` : ''}
+        <div class="countdown-unit"><span class="countdown-number">${String(until.m).padStart(2, '0')}</span><span class="countdown-suffix">min</span></div>
+        <div class="countdown-unit"><span class="countdown-number">${String(until.s).padStart(2, '0')}</span><span class="countdown-suffix">sec</span></div>
+      </div>
+      <div style="margin-top:12px; font-size:12px; color:var(--text-muted);">${formatDayTime(nextFav.startTime)} · ${nextFav.stage}</div>
+    </div>`;
+  }
+
+  // Your live events
+  if (liveFavs.length > 0) {
+    html += `<div class="now-next-section"><h2><span class="live-dot"></span> Happening Now (Your Schedule)</h2>`;
+    liveFavs.forEach(s => html += renderCard(s));
+    html += '</div>';
+  }
+
+  // All live events
+  if (liveAll.length > 0) {
+    html += `<div class="now-next-section"><h2><span class="live-dot"></span> All Live Events</h2>`;
+    liveAll.forEach(s => html += renderCard(s));
+    html += '</div>';
+  }
+
+  // Upcoming favorites
+  if (upcomingFavs.length > 0) {
+    html += `<div class="now-next-section"><h2>Coming Up (Your Schedule)</h2>`;
+    upcomingFavs.slice(0, 5).forEach(s => html += renderCard(s));
+    html += '</div>';
+  }
+
+  if (!html) {
+    const allUpcoming = SESSIONS.filter(s => new Date(s.startTime).getTime() > now)
+      .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+    if (allUpcoming.length > 0) {
+      const untilNext = timeUntil(allUpcoming[0].startTime);
+      html += `<div class="countdown-display">
+        <div class="countdown-label">Next Event</div>
+        <div class="countdown-event">${allUpcoming[0].title}</div>
+        ${untilNext ? `<div class="countdown-timer">
+          ${untilNext.h > 0 ? `<div class="countdown-unit"><span class="countdown-number">${untilNext.h}</span><span class="countdown-suffix">hr</span></div>` : ''}
+          <div class="countdown-unit"><span class="countdown-number">${String(untilNext.m).padStart(2, '0')}</span><span class="countdown-suffix">min</span></div>
+          <div class="countdown-unit"><span class="countdown-number">${String(untilNext.s).padStart(2, '0')}</span><span class="countdown-suffix">sec</span></div>
+        </div>` : ''}
+        <div style="margin-top:12px; font-size:12px; color:var(--text-muted);">${formatDayTime(allUpcoming[0].startTime)} · ${allUpcoming[0].stage}</div>
+      </div>`;
+      html += `<div class="now-next-section"><h2>Coming Up Next</h2>`;
+      allUpcoming.slice(0, 6).forEach(s => html += renderCard(s));
+      html += '</div>';
+    } else {
+      html = `<div class="empty-state">
+        <div class="empty-icon">\u{1F389}</div>
+        <h3>BlizzCon has ended!</h3>
+        <p>Hope you had an amazing time. See you next year!</p>
+      </div>`;
+    }
+  }
+
+  document.getElementById('nowNextContent').innerHTML = html;
+}
+
+// ── Favorites ──
+function toggleFavorite(uid) {
+  if (state.favorites.has(uid)) {
+    state.favorites.delete(uid);
+    clearNotificationTimer(uid);
+  } else {
+    state.favorites.add(uid);
+    scheduleNotification(uid);
+  }
+  saveFavorites();
+
+  // Re-render current view
+  if (state.tab === 'schedule') renderSchedule();
+  else if (state.tab === 'my') renderMySchedule();
+  else if (state.tab === 'now') renderNowNext();
+}
+
+function clearAllFavorites() {
+  if (state.favorites.size === 0) { showToast('No favorites to clear'); return; }
+  if (!confirm('Clear all favorites?')) return;
+  Object.keys(state.notificationTimers).forEach(clearNotificationTimer);
+  state.favorites.clear();
+  saveFavorites();
+  renderMySchedule();
+  showToast('All favorites cleared');
+}
+
+// ── Custom Events ──
+function openCustomForm(editId) {
+  if (editId) {
+    const events = loadCustomEvents();
+    const ev = events.find(e => e.id === editId);
+    if (ev) {
+      document.getElementById('customTitle').value = ev.title;
+      document.getElementById('customDay').value = ev.day;
+      const startLocal = new Date(ev.startTime);
+      const endLocal = new Date(ev.endTime);
+      document.getElementById('customStart').value = startLocal.toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit',hour12:false});
+      document.getElementById('customEnd').value = endLocal.toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit',hour12:false});
+      document.getElementById('customLocation').value = ev.stage || '';
+      document.getElementById('customNotes').value = ev.description || '';
+      document.getElementById('customFormBackdrop').dataset.editId = editId;
+    }
+  } else {
+    document.getElementById('customTitle').value = '';
+    document.getElementById('customDay').value = 'saturday';
+    document.getElementById('customStart').value = '12:00';
+    document.getElementById('customEnd').value = '13:00';
+    document.getElementById('customLocation').value = '';
+    document.getElementById('customNotes').value = '';
+    delete document.getElementById('customFormBackdrop').dataset.editId;
+  }
+  document.getElementById('customFormBackdrop').classList.add('open');
+  document.getElementById('customTitle').focus();
+}
+
+function closeCustomForm() {
+  document.getElementById('customFormBackdrop').classList.remove('open');
+}
+
+function saveCustomEvent() {
+  const title = document.getElementById('customTitle').value.trim();
+  if (!title) { showToast('Please enter an event name'); return; }
+  const day = document.getElementById('customDay').value;
+  const startTime = document.getElementById('customStart').value;
+  const endTime = document.getElementById('customEnd').value;
+  const location = document.getElementById('customLocation').value.trim();
+  const notes = document.getElementById('customNotes').value.trim();
+
+  const dateStr = day === 'saturday' ? '2026-09-12' : '2026-09-13';
+  const startISO = new Date(dateStr + 'T' + startTime + ':00').toISOString();
+  const endISO = new Date(dateStr + 'T' + endTime + ':00').toISOString();
+
+  const editId = document.getElementById('customFormBackdrop').dataset.editId;
+  const events = loadCustomEvents();
+
+  if (editId) {
+    const idx = events.findIndex(e => e.id === editId);
+    if (idx >= 0) {
+      events[idx] = { ...events[idx], title, day, startTime: startISO, endTime: endISO, stageLocation: '', stage: location || 'Custom', description: notes, dayLabel: day === 'saturday' ? '12 Sep Saturday' : '13 Sep Sunday' };
+    }
+  } else {
+    const id = 'custom-' + Date.now();
+    events.push({
+      id, title, description: notes, startTime: startISO, endTime: endISO,
+      game: 'Custom', streamUrl: '', vodUrl: '',
+      stage: location || 'Custom', stageLocation: '',
+      day, dayLabel: day === 'saturday' ? '12 Sep Saturday' : '13 Sep Sunday'
+    });
+    saveCustomEvents(events);
+    SESSIONS = buildSessionList();
+    const newSession = SESSIONS.find(s => s.id === id);
+    if (newSession) {
+      state.favorites.add(newSession._uid);
+      saveFavorites();
+    }
+  }
+
+  if (editId) saveCustomEvents(events);
+  SESSIONS = buildSessionList();
+  closeCustomForm();
+  renderGameFilters();
+  switchTab('my');
+  showToast(editId ? 'Event updated' : 'Event added to your schedule');
+}
+
+function deleteCustomEvent(id) {
+  if (!confirm('Delete this event?')) return;
+  const events = loadCustomEvents().filter(e => e.id !== id);
+  saveCustomEvents(events);
+  const session = SESSIONS.find(s => s.id === id);
+  if (session) state.favorites.delete(session._uid);
+  saveFavorites();
+  SESSIONS = buildSessionList();
+  closeModal();
+  if (state.tab === 'schedule') renderSchedule();
+  else if (state.tab === 'my') renderMySchedule();
+  else if (state.tab === 'now') renderNowNext();
+  showToast('Event deleted');
+}
+
+// ── Detail Modal ──
+function openDetail(uid) {
+  const session = SESSIONS.find(s => s._uid === uid);
+  if (!session) return;
+  const starred = state.favorites.has(uid);
+  const conflicts = starred ? getConflicts(uid) : [];
+  const stageLabel = session._allStages ? 'Simulcast — All Stages' : session.stage + ' · ' + session.stageLocation;
+
+  document.getElementById('modalSheet').innerHTML = `
+    <div class="modal-handle"></div>
+    <span class="session-game-badge" style="margin-bottom:12px; display:inline-block;">${GAME_LABELS[session.game] || session.game}</span>
+    <h2 class="modal-title">${session.title}</h2>
+    <div class="modal-meta">
+      <span>\u{1F4C5} ${session.day === 'saturday' ? 'Saturday, September 12' : 'Sunday, September 13'}</span>
+      <span>\u{1F552} ${formatTimeRange(session.startTime, session.endTime)}</span>
+      <span>\u{1F4CD} ${stageLabel}</span>
+      ${session._allStages ? '<span style="font-size:12px; color:var(--text-muted);">' + session._allStages.join(' · ') + '</span>' : ''}
+    </div>
+    ${session.description ? `<p class="modal-desc">${session.description}</p>` : '<p class="modal-desc" style="color:var(--text-muted); font-style:italic;">No description available.</p>'}
+    ${conflicts.length ? `<div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:10px; padding:12px; margin-bottom:16px; font-size:13px;">
+      <strong style="color:var(--conflict);">⚠️ Schedule Conflict</strong><br>
+      <span style="color:var(--text-secondary);">Overlaps with: ${conflicts.map(c => c.title).join(', ')}</span>
+    </div>` : ''}
+    <div class="modal-notes">
+      <div class="modal-notes-label">My Notes</div>
+      <textarea id="modalNoteInput" placeholder="Add a personal note..." onblur="saveNote('${uid}', this.value); if(state.tab==='schedule')renderSchedule(); else if(state.tab==='my')renderMySchedule(); else if(state.tab==='now')renderNowNext();">${state.notes[uid] || ''}</textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-star ${starred ? 'starred' : ''}" onclick="toggleFavorite('${uid}'); openDetail('${uid}');">
+        ${starred ? '★ In My Schedule' : '☆ Add to Schedule'}
+      </button>
+      ${session.id.startsWith('custom-') ? `<button class="btn-close-modal" style="color:var(--conflict);" onclick="deleteCustomEvent('${session.id}')">Delete</button>` : ''}
+      <button class="btn-close-modal" onclick="closeModal()">Close</button>
+    </div>`;
+  document.getElementById('modalBackdrop').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modalBackdrop')) return;
+  document.getElementById('modalBackdrop').classList.remove('open');
+}
+
+// ── Search ──
+function toggleSearch() {
+  const overlay = document.getElementById('searchOverlay');
+  overlay.classList.toggle('open');
+  if (overlay.classList.contains('open')) {
+    document.getElementById('searchInput').focus();
+  } else {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('searchResults').innerHTML = '';
+  }
+}
+
+function handleSearch(query) {
+  const q = query.toLowerCase().trim();
+  const container = document.getElementById('searchResults');
+  if (!q) { container.innerHTML = ''; return; }
+  const results = SESSIONS.filter(s =>
+    s.title.toLowerCase().includes(q) ||
+    s.description.toLowerCase().includes(q) ||
+    s.stage.toLowerCase().includes(q) ||
+    s.game.toLowerCase().includes(q)
+  ).sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+
+  if (results.length === 0) {
+    container.innerHTML = '<div class="empty-state"><h3>No results</h3><p>Try a different search term</p></div>';
+    return;
+  }
+  container.innerHTML = results.map(s => renderCard(s)).join('');
+}
+
+// ── Notifications ──
+function toggleNotifications() {
+  if (!('Notification' in window)) {
+    showToast('Notifications not supported in this browser');
+    return;
+  }
+  if (state.notificationsEnabled) {
+    state.notificationsEnabled = false;
+    Object.keys(state.notificationTimers).forEach(clearNotificationTimer);
+    document.getElementById('notifyBtn').classList.remove('active');
+    showToast('Notifications disabled');
+    return;
+  }
+  Notification.requestPermission().then(perm => {
+    if (perm === 'granted') {
+      state.notificationsEnabled = true;
+      document.getElementById('notifyBtn').classList.add('active');
+      state.favorites.forEach(uid => scheduleNotification(uid));
+      showToast('Notifications enabled! You\'ll get alerts 15 min before events');
+    } else {
+      showToast('Please allow notifications in your browser settings');
+    }
+  });
+}
+
+function scheduleNotification(uid) {
+  if (!state.notificationsEnabled) return;
+  const session = SESSIONS.find(s => s._uid === uid);
+  if (!session) return;
+  const alertTime = new Date(session.startTime).getTime() - 15 * 60000;
+  const delay = alertTime - Date.now();
+  if (delay <= 0) return;
+  clearNotificationTimer(uid);
+  state.notificationTimers[uid] = setTimeout(() => {
+    new Notification('BlizzCon Pocket Guide', {
+      body: `${session.title} starts in 15 minutes!\n${session.stage} · ${session.stageLocation}`,
+      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">⚔️</text></svg>'
+    });
+  }, delay);
+}
+
+function clearNotificationTimer(uid) {
+  if (state.notificationTimers[uid]) {
+    clearTimeout(state.notificationTimers[uid]);
+    delete state.notificationTimers[uid];
+  }
+}
+
+// ── Toast ──
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ── Live update timer ──
+let liveTimer;
+function startLiveUpdates() {
+  if (liveTimer) clearInterval(liveTimer);
+  liveTimer = setInterval(() => {
+    if (state.tab === 'now') renderNowNext();
+  }, 1000);
+}
+
+// ── Init ──
+loadFavorites();
+loadNotes();
+renderGameFilters();
+renderSchedule();
+startLiveUpdates();
+
+// Re-schedule notifications for existing favorites on load
+if ('Notification' in window && Notification.permission === 'granted') {
+  state.notificationsEnabled = true;
+  document.getElementById('notifyBtn').classList.add('active');
+  state.favorites.forEach(uid => scheduleNotification(uid));
+}
+
+// Handle escape key for modals
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('customFormBackdrop').classList.contains('open')) closeCustomForm();
+    else if (document.getElementById('searchOverlay').classList.contains('open')) toggleSearch();
+    else if (document.getElementById('modalBackdrop').classList.contains('open')) closeModal();
+  }
+});
+</script>
