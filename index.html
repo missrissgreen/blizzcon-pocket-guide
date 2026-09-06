@@ -85,11 +85,7 @@ body {
   font-size: 20px; padding: 4px;
 }
 .app-header .notify-btn.active { color: var(--star); }
-.app-header .search-btn {
-  position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
-  background: none; border: none; color: var(--text-secondary); cursor: pointer;
-  font-size: 18px; padding: 4px;
-}
+
 
 .app-content {
   padding-top: var(--header-height);
@@ -115,28 +111,6 @@ body {
 }
 .nav-item.active { color: #009AE4; }
 .nav-item .nav-icon { font-size: 22px; line-height: 1; display: flex; align-items: center; justify-content: center; }
-/* Search overlay */
-.search-overlay {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200;
-  background: var(--bg-primary);
-  display: none; flex-direction: column;
-}
-.search-overlay.open { display: flex; }
-.search-bar {
-  display: flex; align-items: center; gap: 12px;
-  padding: 8px 16px; border-bottom: 1px solid var(--border);
-  height: var(--header-height);
-}
-.search-bar input {
-  flex: 1; background: none; border: none; outline: none;
-  color: var(--text-primary); font-size: 16px; font-family: inherit;
-}
-.search-bar input::placeholder { color: var(--text-muted); }
-.search-bar button {
-  background: none; border: none; color: var(--text-secondary);
-  cursor: pointer; font-size: 14px; font-weight: 600; padding: 4px 8px;
-}
-.search-results { flex: 1; overflow-y: auto; padding: 8px 0; }
 
 /* Filters */
 .filters-bar {
@@ -188,6 +162,15 @@ body {
 .filter-chip[data-game="Community"].active { background: var(--community); }
 .filter-chip[data-game="Custom"].active { background: var(--custom); color: #1a1a1a; }
 
+.inline-search {
+  width: 100%; padding: 10px 14px; border-radius: 10px;
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  color: var(--text-primary); font-size: 14px; font-family: inherit;
+  outline: none; transition: border-color 0.2s;
+}
+.inline-search::placeholder { color: var(--text-muted); }
+.inline-search:focus { border-color: var(--blizzard); }
+
 /* Time group */
 .time-group { margin-bottom: 4px; }
 .time-label {
@@ -195,7 +178,7 @@ body {
   font-family: 'Rajdhani', 'Inter', sans-serif;
   font-size: 14px; font-weight: 600; color: var(--text-muted);
   text-transform: uppercase; letter-spacing: 0.08em;
-  position: sticky; top: calc(var(--header-height) + 95px); z-index: 10;
+  position: sticky; top: calc(var(--header-height) + 140px); z-index: 10;
   background: var(--bg-primary);
 }
 
@@ -370,7 +353,8 @@ body {
 }
 .note-indicator {
   font-size: 11px; color: var(--text-muted); margin-top: 4px;
-  display: flex; align-items: center; gap: 4px;
+  font-style: italic;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .modal-actions {
   display: flex; gap: 10px;
@@ -485,28 +469,21 @@ body {
 
 <div id="app">
   <header class="app-header">
-    <button class="search-btn" onclick="toggleSearch()" aria-label="Search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="m21 21-4.35-4.35m-5.65-10.65c2.7614 0 5 2.23858 5 5m3 0c0 4.4183-3.5817 8-8 8-4.41828 0-8-3.5817-8-8 0-4.41828 3.58172-8 8-8 4.4183 0 8 3.58172 8 8z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg></button>
     <h1>BLIZZCON POCKET GUIDE</h1>
     <button class="notify-btn" id="notifyBtn" onclick="toggleNotifications()" aria-label="Notifications"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="m9.35419 21c.70511.6224 1.63141 1 2.64581 1 1.0145 0 1.9407-.3776 2.6458-1m3.3542-13c0-1.5913-.6321-3.11742-1.7573-4.24264-1.1253-1.12522-2.6514-1.75736-4.2427-1.75736s-3.1174.63214-4.24262 1.75736-1.75736 2.65134-1.75736 4.24264c0 3.0902-.77953 5.206-1.65034 6.6054-.73453 1.1805-1.1018 1.7707-1.08834 1.9354.01492.1823.05354.2518.20045.3608.13269.0984.73082.0984 1.92708.0984h13.22233c1.1962 0 1.7944 0 1.927-.0984.147-.109.1856-.1785.2005-.3608.0135-.1647-.3538-.7549-1.0883-1.9354-.8709-1.3994-1.6504-3.5152-1.6504-6.6054z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg></button>
   </header>
-
-  <div class="search-overlay" id="searchOverlay">
-    <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="Search events..." oninput="handleSearch(this.value)" autocomplete="off">
-      <button onclick="toggleSearch()">Cancel</button>
-    </div>
-    <div class="search-results" id="searchResults"></div>
-  </div>
 
   <main class="app-content">
     <!-- Schedule Tab -->
     <div id="tab-schedule" class="tab-panel">
       <div class="filters-bar">
         <div class="day-toggle">
-          <button class="day-btn active" data-day="saturday" onclick="setDay('saturday')">SAT SEP 12</button>
-          <button class="day-btn" data-day="sunday" onclick="setDay('sunday')">SUN SEP 13</button>
+          <button class="day-btn active" data-day="all" onclick="setDay('all')">Both Days</button>
+          <button class="day-btn" data-day="saturday" onclick="setDay('saturday')">Saturday</button>
+          <button class="day-btn" data-day="sunday" onclick="setDay('sunday')">Sunday</button>
         </div>
         <div class="filter-chips" id="gameFilters"></div>
+        <input type="text" class="inline-search" id="inlineSearch" placeholder="Search events..." oninput="handleInlineSearch(this.value)" autocomplete="off">
       </div>
       <div id="scheduleList"></div>
     </div>
@@ -663,7 +640,7 @@ function gameClass(game) {
 // ── State ──
 let state = {
   tab: 'schedule',
-  day: 'saturday',
+  day: 'all',
   myDay: 'all',
   gameFilter: 'all',
   favorites: new Set(),
@@ -749,7 +726,7 @@ function renderCard(session, opts = {}) {
       </div>
       <span class="session-game-badge">${GAME_LABELS[session.game] || session.game}</span>
       ${conflicts.length ? `<div class="conflict-badge">⚠️ Conflicts with ${conflicts.length} event${conflicts.length > 1 ? 's' : ''}</div>` : ''}
-      ${state.notes[session._uid] ? '<div class="note-indicator">📝 Note</div>' : ''}
+      ${state.notes[session._uid] ? `<div class="note-indicator">${state.notes[session._uid]}</div>` : ''}
     </div>
     <button class="star-btn ${starred ? 'starred' : ''}" onclick="event.stopPropagation(); toggleFavorite('${session._uid}')" aria-label="${starred ? 'Remove from' : 'Add to'} favorites">
       ${starred ? '★' : '☆'}
@@ -791,24 +768,27 @@ function renderGameFilters() {
 }
 
 function renderSchedule() {
+  const searchQuery = (document.getElementById('inlineSearch')?.value || '').toLowerCase().trim();
   const filtered = SESSIONS.filter(s => {
-    if (s.day !== state.day) return false;
+    if (state.day !== 'all' && s.day !== state.day) return false;
     if (state.gameFilter !== 'all' && s.game !== state.gameFilter) return false;
+    if (searchQuery && !s.title.toLowerCase().includes(searchQuery) && !s.description.toLowerCase().includes(searchQuery) && !s.stage.toLowerCase().includes(searchQuery) && !s.game.toLowerCase().includes(searchQuery)) return false;
     return true;
   }).sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
-
-  const groups = new Map();
-  filtered.forEach(s => {
-    const key = formatTime(s.startTime);
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key).push(s);
-  });
 
   const container = document.getElementById('scheduleList');
   if (filtered.length === 0) {
     container.innerHTML = '<div class="empty-state"><div class="empty-icon">\u{1F50D}</div><h3>No events found</h3><p>Try changing your filters</p></div>';
     return;
   }
+
+  const groups = new Map();
+  filtered.forEach(s => {
+    const dayPrefix = state.day === 'all' ? (s.day === 'saturday' ? 'Saturday · ' : 'Sunday · ') : '';
+    const key = dayPrefix + formatTime(s.startTime);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(s);
+  });
 
   let html = '';
   groups.forEach((sessions, time) => {
@@ -1014,9 +994,19 @@ function saveCustomEvent() {
   const events = loadCustomEvents();
 
   if (editId) {
+    const oldSession = SESSIONS.find(s => s.id === editId);
+    const oldUid = oldSession ? oldSession._uid : null;
     const idx = events.findIndex(e => e.id === editId);
     if (idx >= 0) {
       events[idx] = { ...events[idx], title, day, startTime: startISO, endTime: endISO, stageLocation: '', stage: location || 'Custom', description: notes, dayLabel: day === 'saturday' ? '12 Sep Saturday' : '13 Sep Sunday' };
+    }
+    if (oldUid && state.favorites.has(oldUid)) {
+      state.favorites.delete(oldUid);
+      saveCustomEvents(events);
+      SESSIONS = buildSessionList();
+      const newSession = SESSIONS.find(s => s.id === editId);
+      if (newSession) state.favorites.add(newSession._uid);
+      saveFavorites();
     }
   } else {
     const id = 'custom-' + Date.now();
@@ -1101,33 +1091,8 @@ function closeModal(e) {
 }
 
 // ── Search ──
-function toggleSearch() {
-  const overlay = document.getElementById('searchOverlay');
-  overlay.classList.toggle('open');
-  if (overlay.classList.contains('open')) {
-    document.getElementById('searchInput').focus();
-  } else {
-    document.getElementById('searchInput').value = '';
-    document.getElementById('searchResults').innerHTML = '';
-  }
-}
-
-function handleSearch(query) {
-  const q = query.toLowerCase().trim();
-  const container = document.getElementById('searchResults');
-  if (!q) { container.innerHTML = ''; return; }
-  const results = SESSIONS.filter(s =>
-    s.title.toLowerCase().includes(q) ||
-    s.description.toLowerCase().includes(q) ||
-    s.stage.toLowerCase().includes(q) ||
-    s.game.toLowerCase().includes(q)
-  ).sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
-
-  if (results.length === 0) {
-    container.innerHTML = '<div class="empty-state"><h3>No results</h3><p>Try a different search term</p></div>';
-    return;
-  }
-  container.innerHTML = results.map(s => renderCard(s)).join('');
+function handleInlineSearch() {
+  renderSchedule();
 }
 
 // ── Notifications ──
@@ -1213,7 +1178,6 @@ if ('Notification' in window && Notification.permission === 'granted') {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     if (document.getElementById('customFormBackdrop').classList.contains('open')) closeCustomForm();
-    else if (document.getElementById('searchOverlay').classList.contains('open')) toggleSearch();
     else if (document.getElementById('modalBackdrop').classList.contains('open')) closeModal();
   }
 });
