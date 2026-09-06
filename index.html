@@ -178,7 +178,7 @@ body {
   font-family: 'Rajdhani', 'Inter', sans-serif;
   font-size: 14px; font-weight: 600; color: var(--text-muted);
   text-transform: uppercase; letter-spacing: 0.08em;
-  position: sticky; top: calc(var(--header-height) + 140px); z-index: 10;
+  position: sticky; top: calc(var(--header-height) + var(--schedule-filters-height, 140px)); z-index: 10;
   background: var(--bg-primary);
 }
 
@@ -406,6 +406,24 @@ body {
 .util-btn:active { transform: scale(0.97); }
 .util-btn.danger { border-color: rgba(239,68,68,0.3); color: var(--conflict); }
 .util-btn.primary { border-color: rgba(34,197,94,0.3); color: var(--custom); }
+.util-btn.active { background: rgba(0,154,228,0.15); border-color: rgba(0,154,228,0.4); color: var(--blizzard); }
+
+.free-time-card {
+  border-left: 3px dashed var(--border-light) !important;
+  background: transparent;
+  border: 1px dashed var(--border-light);
+  cursor: default;
+}
+.free-time-card:active { transform: none; background: transparent; }
+.free-time-card .session-title {
+  color: var(--text-muted); font-weight: 600;
+}
+.free-time-card .free-duration {
+  display: inline-block; padding: 2px 8px; border-radius: 4px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.05em; margin-top: 6px;
+  background: rgba(107,114,128,0.15); color: var(--text-muted);
+}
 
 /* Custom event form */
 .custom-form-backdrop {
@@ -463,6 +481,8 @@ body {
 }
 .app-footer a:hover { text-decoration: underline; }
 
+#tab-my .time-label { top: calc(var(--header-height) + var(--my-filters-height, 60px)); }
+
 /* Utility */
 .hidden { display: none !important; }
 </style>
@@ -496,9 +516,11 @@ body {
           <button class="day-btn" data-day="saturday" onclick="setMyDay('saturday')">Saturday</button>
           <button class="day-btn" data-day="sunday" onclick="setMyDay('sunday')">Sunday</button>
         </div>
+        <div class="filter-chips" id="myGameFilters"></div>
       </div>
       <div class="util-bar">
         <button class="util-btn primary" onclick="openCustomForm()">+ Add Event</button>
+        <button class="util-btn" id="freeTimeBtn" onclick="toggleFreeTime()">Free Time</button>
         <button class="util-btn danger" id="clearAllBtn" onclick="clearAllFavorites()">Clear All</button>
       </div>
       <div id="myScheduleList"></div>
@@ -649,6 +671,8 @@ let state = {
   day: 'all',
   myDay: 'all',
   gameFilter: 'all',
+  myGameFilter: 'all',
+  showFreeTime: false,
   favorites: new Set(),
   notificationsEnabled: false,
   notificationTimers: {},
@@ -773,7 +797,13 @@ function renderGameFilters() {
   ).join('');
 }
 
+function updateFiltersHeight(tabId, varName) {
+  const bar = document.querySelector('#tab-' + tabId + ' .filters-bar');
+  if (bar) document.documentElement.style.setProperty('--' + varName, bar.offsetHeight + 'px');
+}
+
 function renderSchedule() {
+  updateFiltersHeight('schedule', 'schedule-filters-height');
   const searchQuery = (document.getElementById('inlineSearch')?.value || '').toLowerCase().trim();
   const filtered = SESSIONS.filter(s => {
     if (state.day !== 'all' && s.day !== state.day) return false;
@@ -812,9 +842,106 @@ function setMyDay(day) {
   renderMySchedule();
 }
 
+function setMyGameFilter(game) {
+  state.myGameFilter = game;
+  document.querySelectorAll('#myGameFilters .filter-chip').forEach(c => c.classList.toggle('active', c.dataset.game === game));
+  renderMySchedule();
+}
+
+function renderMyGameFilters() {
+  const container = document.getElementById('myGameFilters');
+  const favGames = new Set(SESSIONS.filter(s => state.favorites.has(s._uid)).map(s => s.game));
+  if (favGames.size < 2) { container.innerHTML = ''; return; }
+  if (!favGames.has(state.myGameFilter)) state.myGameFilter = 'all';
+  const visible = ['all', ...GAMES.filter(g => g !== 'all' && favGames.has(g))];
+  container.innerHTML = visible.map(g =>
+    `<button class="filter-chip ${g === state.myGameFilter ? 'active' : ''}" data-game="${g}" onclick="setMyGameFilter('${g}')">${GAME_LABELS[g]}</button>`
+  ).join('');
+}
+
+function toggleFreeTime() {
+  state.showFreeTime = !state.showFreeTime;
+  document.getElementById('freeTimeBtn').classList.toggle('active', state.showFreeTime);
+  renderMySchedule();
+}
+
+function calcFreeBlocks(dayFilter) {
+  const allFavs = SESSIONS.filter(s => state.favorites.has(s._uid))
+    .filter(s => dayFilter === 'all' || s.day === dayFilter)
+    .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+  const blocks = [];
+  const openTime = { saturday: '2026-09-12T16:00:00.000Z', sunday: '2026-09-13T16:00:00.000Z' };
+  const closeTime = { saturday: '2026-09-13T02:00:00.000Z', sunday: '2026-09-14T02:00:00.000Z' };
+  ['saturday', 'sunday'].forEach(day => {
+    const daySessions = allFavs.filter(s => s.day === day);
+    if (daySessions.length < 1) return;
+    const firstStart = new Date(daySessions[0].startTime).getTime();
+    const open = new Date(openTime[day]).getTime();
+    if (firstStart > open) {
+      const mins = Math.round((firstStart - open) / 60000);
+      if (mins >= 15) {
+        blocks.push({
+          _isFreeTime: true,
+          startTime: openTime[day],
+          endTime: daySessions[0].startTime,
+          day, duration: mins
+        });
+      }
+    }
+    let latestEnd = new Date(daySessions[0].endTime).getTime();
+    for (let i = 1; i < daySessions.length; i++) {
+      const start = new Date(daySessions[i].startTime).getTime();
+      const end = new Date(daySessions[i].endTime).getTime();
+      if (start > latestEnd) {
+        const mins = Math.round((start - latestEnd) / 60000);
+        if (mins >= 15) {
+          blocks.push({
+            _isFreeTime: true,
+            startTime: new Date(latestEnd).toISOString(),
+            endTime: daySessions[i].startTime,
+            day, duration: mins
+          });
+        }
+      }
+      if (end > latestEnd) latestEnd = end;
+    }
+    const close = new Date(closeTime[day]).getTime();
+    if (latestEnd < close) {
+      const mins = Math.round((close - latestEnd) / 60000);
+      if (mins >= 15) {
+        blocks.push({
+          _isFreeTime: true,
+          startTime: new Date(latestEnd).toISOString(),
+          endTime: closeTime[day],
+          day, duration: mins
+        });
+      }
+    }
+  });
+  return blocks;
+}
+
+function renderFreeCard(block) {
+  const hrs = Math.floor(block.duration / 60);
+  const mins = block.duration % 60;
+  const dur = hrs > 0 ? hrs + 'h' + (mins > 0 ? ' ' + mins + 'm' : '') : mins + 'm';
+  return `<div class="session-card free-time-card">
+    <div class="session-info">
+      <div class="session-title">Free Time</div>
+      <div class="session-meta">
+        <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="vertical-align:-2px;"><path d="m12 6v6l4 2m6-2c0 5.5228-4.4772 10-10 10-5.52285 0-10-4.4772-10-10 0-5.52285 4.47715-10 10-10 5.5228 0 10 4.47715 10 10z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg> ${formatTimeRange(block.startTime, block.endTime)}</span>
+      </div>
+      <span class="free-duration">${dur} free</span>
+    </div>
+  </div>`;
+}
+
 function renderMySchedule() {
+  renderMyGameFilters();
+  updateFiltersHeight('my', 'my-filters-height');
   const favSessions = SESSIONS.filter(s => state.favorites.has(s._uid))
     .filter(s => state.myDay === 'all' || s.day === state.myDay)
+    .filter(s => state.myGameFilter === 'all' || s.game === state.myGameFilter)
     .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
 
   const container = document.getElementById('myScheduleList');
@@ -827,17 +954,23 @@ function renderMySchedule() {
     return;
   }
 
+  const freeBlocks = state.showFreeTime ? calcFreeBlocks(state.myDay) : [];
+  const items = [...favSessions.map(s => ({...s})), ...freeBlocks]
+    .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+
   const groups = new Map();
-  favSessions.forEach(s => {
-    const key = s.day === 'saturday' ? 'Saturday, Sep 12' : 'Sunday, Sep 13';
+  items.forEach(s => {
+    const dayPrefix = state.myDay === 'all' ? (s.day === 'saturday' ? 'Saturday · ' : 'Sunday · ') : '';
+    const key = dayPrefix + formatTime(s.startTime);
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(s);
   });
 
   let html = '';
-  groups.forEach((sessions, dayLabel) => {
-    if (state.myDay === 'all') html += `<div class="time-label" style="position:static; font-size:14px; color:var(--text-secondary);">${dayLabel}</div>`;
-    sessions.forEach(s => html += renderCard(s));
+  groups.forEach((sessions, time) => {
+    html += `<div class="time-group"><div class="time-label">${time}</div>`;
+    sessions.forEach(s => html += s._isFreeTime ? renderFreeCard(s) : renderCard(s));
+    html += '</div>';
   });
   container.innerHTML = html;
 
