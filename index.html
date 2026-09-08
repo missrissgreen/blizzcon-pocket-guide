@@ -70,8 +70,8 @@ body {
   background: var(--bg-primary);
   border-bottom: 1px solid var(--border);
   height: var(--header-height);
-  display: flex; align-items: center; justify-content: center;
-  padding: 0 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 8px; gap: 8px;
 }
 .app-header h1 {
   font-family: 'Rajdhani', 'Inter', sans-serif;
@@ -80,12 +80,23 @@ body {
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text; letter-spacing: 0.12em;
 }
-.app-header .notify-btn {
-  position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+.app-header .header-btn {
   background: none; border: none; color: var(--text-secondary); cursor: pointer;
-  font-size: 20px; padding: 4px;
+  padding: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
 }
-.app-header .notify-btn.active { color: var(--star); }
+.app-header .header-btn.active { color: var(--star); }
+.header-search {
+  display: none; flex: 1; min-width: 0;
+  padding: 8px 12px; border-radius: 8px;
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  color: var(--text-primary); font-size: 15px; font-family: inherit;
+  outline: none;
+}
+.header-search::placeholder { color: var(--text-muted); }
+.header-search:focus { border-color: var(--blizzard); }
+.app-header.searching #headerTitle { display: none; }
+.app-header.searching .header-search { display: block; }
+.app-header.searching #searchBtn { color: var(--blizzard); }
 
 
 .app-content {
@@ -125,52 +136,121 @@ body {
   padding: 3px; gap: 2px;
 }
 .day-btn {
-  flex: 1; padding: 10px 12px;
+  flex: 1; padding: 10px 6px;
   background: none; border: none; border-radius: 8px;
   color: var(--text-secondary);
   font-family: 'Rajdhani', 'Inter', sans-serif;
   font-size: 14px; font-weight: 700;
   cursor: pointer; transition: all 0.2s;
   text-transform: uppercase; letter-spacing: 0.06em;
+  white-space: nowrap;
 }
 .day-btn.active {
   background: #009AE4; color: white;
   box-shadow: 0 2px 8px rgba(0,154,228,0.3);
 }
-.filter-chips {
-  display: flex; gap: 6px; overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; padding-bottom: 2px;
+.filter-row {
+  display: flex; gap: 8px; align-items: center;
 }
-.filter-chips::-webkit-scrollbar { display: none; }
-.filter-chip {
-  padding: 6px 14px; border-radius: 20px;
+.filter-toggle-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border-radius: 10px;
   background: var(--bg-secondary); border: 1px solid var(--border);
-  color: var(--text-secondary); font-size: 12px; font-weight: 600;
-  white-space: nowrap; cursor: pointer; transition: all 0.2s;
-  flex-shrink: 0;
+  color: var(--text-secondary); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s; white-space: nowrap;
 }
-.filter-chip.active {
-  border-color: transparent; color: white;
+.filter-toggle-btn:active { transform: scale(0.97); }
+.filter-toggle-btn.has-filters { border-color: rgba(0,154,228,0.4); color: var(--blizzard); background: rgba(0,154,228,0.1); }
+.filter-toggle-btn .filter-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px; border-radius: 9px;
+  background: var(--blizzard); color: #fff; font-size: 11px; font-weight: 700;
+  padding: 0 5px;
 }
-.filter-chip[data-game="all"].active { background: #374151; border-color: var(--border-light); }
-.filter-chip[data-game="World of warcraft"].active { background: var(--wow); color: #1a1a1a; }
-.filter-chip[data-game="Diablo"].active { background: var(--diablo); }
-.filter-chip[data-game="Overwatch 2"].active { background: var(--overwatch); color: #1a1a1a; }
-.filter-chip[data-game="Hearthstone"].active { background: var(--hearthstone); color: #1a1a1a; }
-.filter-chip[data-game="Classic Cup"].active { background: var(--classic); color: #1a1a1a; }
-.filter-chip[data-game="Blizzard"].active { background: var(--blizzard); }
-.filter-chip[data-game="Community"].active { background: var(--community); }
-.filter-chip[data-game="Custom"].active { background: var(--custom); color: #1a1a1a; }
+.filter-panel {
+  display: none; flex-direction: column; gap: 12px;
+  padding: 12px 16px 14px;
+  background: var(--bg-primary); border-bottom: 1px solid var(--border);
+  position: sticky; z-index: 49;
+}
+#scheduleFilterPanel { top: calc(var(--header-height) + var(--schedule-filters-height, 52px)); }
+#myFilterPanel { top: calc(var(--header-height) + var(--my-filters-height, 52px)); }
+#tab-schedule .time-label { top: calc(var(--header-height) + var(--schedule-filters-height, 52px) + var(--schedule-filters-height-panel, 0px)); }
+#tab-my .time-label { top: calc(var(--header-height) + var(--my-filters-height, 52px) + var(--my-filters-height-panel, 0px)); }
+.filter-panel.open { display: flex; }
+.filter-panel-header {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.filter-panel-header span {
+  font-size: 12px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--text-secondary);
+}
+.filter-panel-header button {
+  background: none; border: none; color: var(--blizzard);
+  font-size: 12px; font-weight: 600; cursor: pointer; padding: 4px 0;
+}
+.filter-game-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+}
+.filter-game-option {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: 8px;
+  background: var(--bg-secondary); border: 1.5px solid transparent;
+  cursor: pointer; transition: all 0.15s;
+}
+.filter-game-option.checked { border-color: var(--border-light); background: var(--bg-tertiary, rgba(255,255,255,0.05)); }
+.filter-game-checkbox {
+  width: 18px; height: 18px; border-radius: 4px;
+  border: 2px solid var(--border-light); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.filter-game-option.checked .filter-game-checkbox {
+  border-color: currentColor; background: currentColor;
+}
+.filter-game-option.checked .filter-game-checkbox::after {
+  content: ''; display: block; width: 5px; height: 9px;
+  border: solid var(--bg-primary); border-width: 0 2px 2px 0;
+  transform: rotate(45deg) translateY(-1px);
+}
+.filter-game-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.filter-game-name {
+  font-size: 13px; font-weight: 600; color: var(--text-primary);
+}
+.filter-divider {
+  height: 1px; background: var(--border); margin: 2px 0;
+}
+.filter-toggles {
+  display: flex; gap: 8px;
+}
+.filter-toggle-option {
+  flex: 1; display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: 8px;
+  background: var(--bg-secondary); border: 1.5px solid transparent;
+  cursor: pointer; transition: all 0.15s; font-size: 13px; font-weight: 600;
+  color: var(--text-primary);
+}
+.filter-toggle-option.checked { border-color: rgba(0,154,228,0.4); background: rgba(0,154,228,0.1); }
+.filter-toggle-switch {
+  width: 32px; height: 18px; border-radius: 9px;
+  background: var(--border-light); flex-shrink: 0;
+  position: relative; transition: background 0.15s;
+}
+.filter-toggle-switch::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #fff; transition: transform 0.15s;
+}
+.filter-toggle-option.checked .filter-toggle-switch {
+  background: var(--blizzard);
+}
+.filter-toggle-option.checked .filter-toggle-switch::after {
+  transform: translateX(14px);
+}
 
-.inline-search {
-  width: 100%; padding: 10px 14px; border-radius: 10px;
-  background: var(--bg-secondary); border: 1px solid var(--border);
-  color: var(--text-primary); font-size: 14px; font-family: inherit;
-  outline: none; transition: border-color 0.2s;
-}
-.inline-search::placeholder { color: var(--text-muted); }
-.inline-search:focus { border-color: var(--blizzard); }
+
 
 /* Time group */
 .time-group { margin-bottom: 4px; }
@@ -179,7 +259,7 @@ body {
   font-family: 'Rajdhani', 'Inter', sans-serif;
   font-size: 14px; font-weight: 600; color: var(--text-muted);
   text-transform: uppercase; letter-spacing: 0.08em;
-  position: sticky; top: calc(var(--header-height) + var(--schedule-filters-height, 140px)); z-index: 10;
+  position: sticky; z-index: 10;
   background: var(--bg-primary);
 }
 
@@ -234,6 +314,7 @@ body {
   line-height: 1;
 }
 .star-btn.starred { color: var(--star); transform: scale(1.1); }
+.star-btn.must-do { color: #ff6b6b; transform: scale(1.15); filter: drop-shadow(0 0 4px rgba(255,107,107,0.4)); }
 .star-btn:active { transform: scale(0.85); }
 
 .live-indicator {
@@ -371,6 +452,7 @@ body {
   border: 1px solid rgba(255,215,0,0.3) !important;
 }
 .btn-star.starred { background: var(--star); color: #1a1a1a; }
+.btn-star.must-do { background: #ff6b6b; color: #fff; border-color: rgba(255,107,107,0.4) !important; }
 .btn-close-modal {
   background: var(--bg-card); color: var(--text-secondary);
 }
@@ -482,46 +564,56 @@ body {
 }
 .app-footer a:hover { text-decoration: underline; }
 
-#tab-my .time-label { top: calc(var(--header-height) + var(--my-filters-height, 60px)); }
-
 /* Utility */
 .hidden { display: none !important; }
 </style>
 
 <div id="app">
   <header class="app-header">
-    <h1>BLIZZCON POCKET GUIDE</h1>
-    <button class="notify-btn" id="notifyBtn" onclick="toggleNotifications()" aria-label="Notifications"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="m9.35419 21c.70511.6224 1.63141 1 2.64581 1 1.0145 0 1.9407-.3776 2.6458-1m3.3542-13c0-1.5913-.6321-3.11742-1.7573-4.24264-1.1253-1.12522-2.6514-1.75736-4.2427-1.75736s-3.1174.63214-4.24262 1.75736-1.75736 2.65134-1.75736 4.24264c0 3.0902-.77953 5.206-1.65034 6.6054-.73453 1.1805-1.1018 1.7707-1.08834 1.9354.01492.1823.05354.2518.20045.3608.13269.0984.73082.0984 1.92708.0984h13.22233c1.1962 0 1.7944 0 1.927-.0984.147-.109.1856-.1785.2005-.3608.0135-.1647-.3538-.7549-1.0883-1.9354-.8709-1.3994-1.6504-3.5152-1.6504-6.6054z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg></button>
+    <button class="header-btn" id="searchBtn" onclick="toggleSearch()" aria-label="Search"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="m21 21-4.35-4.35m2.35-5.65c0 4.4183-3.5817 8-8 8-4.41828 0-8-3.5817-8-8 0-4.41828 3.58172-8 8-8 4.4183 0 8 3.58172 8 8z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg></button>
+    <h1 id="headerTitle">BLIZZCON POCKET GUIDE</h1>
+    <input type="text" class="header-search" id="headerSearch" placeholder="Search events..." oninput="handleInlineSearch()" autocomplete="off">
+    <button class="header-btn" id="notifyBtn" onclick="toggleNotifications()" aria-label="Notifications"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="m9.35419 21c.70511.6224 1.63141 1 2.64581 1 1.0145 0 1.9407-.3776 2.6458-1m3.3542-13c0-1.5913-.6321-3.11742-1.7573-4.24264-1.1253-1.12522-2.6514-1.75736-4.2427-1.75736s-3.1174.63214-4.24262 1.75736-1.75736 2.65134-1.75736 4.24264c0 3.0902-.77953 5.206-1.65034 6.6054-.73453 1.1805-1.1018 1.7707-1.08834 1.9354.01492.1823.05354.2518.20045.3608.13269.0984.73082.0984 1.92708.0984h13.22233c1.1962 0 1.7944 0 1.927-.0984.147-.109.1856-.1785.2005-.3608.0135-.1647-.3538-.7549-1.0883-1.9354-.8709-1.3994-1.6504-3.5152-1.6504-6.6054z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg></button>
   </header>
 
   <main class="app-content">
     <!-- Schedule Tab -->
     <div id="tab-schedule" class="tab-panel">
       <div class="filters-bar">
-        <div class="day-toggle">
-          <button class="day-btn active" data-day="all" onclick="setDay('all')">Both Days</button>
-          <button class="day-btn" data-day="saturday" onclick="setDay('saturday')">Saturday</button>
-          <button class="day-btn" data-day="sunday" onclick="setDay('sunday')">Sunday</button>
+        <div class="filter-row">
+          <div class="day-toggle" style="flex:1;">
+            <button class="day-btn active" data-day="all" onclick="setDay('all')">Both Days</button>
+            <button class="day-btn" data-day="saturday" onclick="setDay('saturday')">Saturday</button>
+            <button class="day-btn" data-day="sunday" onclick="setDay('sunday')">Sunday</button>
+          </div>
+          <button class="filter-toggle-btn" id="scheduleFilterBtn" onclick="toggleFilterPanel('schedule')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Filters
+          </button>
         </div>
-        <div class="filter-chips" id="gameFilters"></div>
-        <input type="text" class="inline-search" id="inlineSearch" placeholder="Search events..." oninput="handleInlineSearch(this.value)" autocomplete="off">
       </div>
+      <div class="filter-panel" id="scheduleFilterPanel"></div>
       <div id="scheduleList"></div>
     </div>
 
     <!-- My Schedule Tab -->
     <div id="tab-my" class="tab-panel hidden">
       <div class="filters-bar">
-        <div class="day-toggle">
-          <button class="day-btn active" data-day="all" onclick="setMyDay('all')">Both Days</button>
-          <button class="day-btn" data-day="saturday" onclick="setMyDay('saturday')">Saturday</button>
-          <button class="day-btn" data-day="sunday" onclick="setMyDay('sunday')">Sunday</button>
+        <div class="filter-row">
+          <div class="day-toggle" style="flex:1;">
+            <button class="day-btn active" data-day="all" onclick="setMyDay('all')">Both Days</button>
+            <button class="day-btn" data-day="saturday" onclick="setMyDay('saturday')">Saturday</button>
+            <button class="day-btn" data-day="sunday" onclick="setMyDay('sunday')">Sunday</button>
+          </div>
+          <button class="filter-toggle-btn" id="myFilterBtn" onclick="toggleFilterPanel('my')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Filters
+          </button>
         </div>
-        <div class="filter-chips" id="myGameFilters"></div>
       </div>
+      <div class="filter-panel" id="myFilterPanel"></div>
       <div class="util-bar">
         <button class="util-btn primary" onclick="openCustomForm()">+ Add Event</button>
-        <button class="util-btn" id="freeTimeBtn" onclick="toggleFreeTime()">Free Time</button>
         <button class="util-btn danger" id="clearAllBtn" onclick="clearAllFavorites()">Clear All</button>
       </div>
       <div id="myScheduleList"></div>
@@ -671,10 +763,12 @@ let state = {
   tab: 'schedule',
   day: 'all',
   myDay: 'all',
-  gameFilter: 'all',
-  myGameFilter: 'all',
+  gameFilters: new Set(),
+  myGameFilters: new Set(),
   showFreeTime: false,
+  mustDoOnly: false,
   favorites: new Set(),
+  mustDos: new Set(),
   notificationsEnabled: false,
   notificationTimers: {},
   notes: {}
@@ -689,6 +783,17 @@ function loadFavorites() {
 function saveFavorites() {
   try {
     localStorage.setItem('blizzcon-favorites', JSON.stringify([...state.favorites]));
+  } catch(e) {}
+}
+function loadMustDos() {
+  try {
+    const saved = localStorage.getItem('blizzcon-mustdos');
+    if (saved) state.mustDos = new Set(JSON.parse(saved));
+  } catch(e) {}
+}
+function saveMustDos() {
+  try {
+    localStorage.setItem('blizzcon-mustdos', JSON.stringify([...state.mustDos]));
   } catch(e) {}
 }
 
@@ -741,6 +846,7 @@ function getConflicts(uid) {
 // ── Render helpers ──
 function renderCard(session, opts = {}) {
   const starred = state.favorites.has(session._uid);
+  const isMustDo = state.mustDos.has(session._uid);
   const live = isLive(session);
   const past = isPast(session);
   const conflicts = starred ? getConflicts(session._uid) : [];
@@ -759,8 +865,8 @@ function renderCard(session, opts = {}) {
       ${conflicts.length ? `<div class="conflict-badge">⚠️ Conflicts with ${conflicts.length} event${conflicts.length > 1 ? 's' : ''}</div>` : ''}
       ${state.notes[session._uid] ? `<div class="note-indicator">${esc(state.notes[session._uid])}</div>` : ''}
     </div>
-    <button class="star-btn ${starred ? 'starred' : ''}" onclick="event.stopPropagation(); toggleFavorite('${session._uid}')" aria-label="${starred ? 'Remove from' : 'Add to'} favorites">
-      ${starred ? '★' : '☆'}
+    <button class="star-btn ${isMustDo ? 'must-do' : starred ? 'starred' : ''}" onclick="event.stopPropagation(); toggleFavorite('${session._uid}')" aria-label="${isMustDo ? 'Must do' : starred ? 'Favorited' : 'Add to favorites'}">
+      ${isMustDo ? '★' : starred ? '★' : '☆'}
     </button>
   </div>`;
 }
@@ -783,32 +889,110 @@ function setDay(day) {
   renderSchedule();
 }
 
-function setGameFilter(game) {
-  state.gameFilter = game;
-  document.querySelectorAll('.filter-chip').forEach(c => c.classList.toggle('active', c.dataset.game === game));
-  renderSchedule();
+const GAME_COLORS = {
+  'World of warcraft': 'var(--wow)', 'Diablo': 'var(--diablo)', 'Overwatch 2': 'var(--overwatch)',
+  'Hearthstone': 'var(--hearthstone)', 'Classic Cup': 'var(--classic)', 'Blizzard': 'var(--blizzard)',
+  'Community': 'var(--community)', 'Custom': 'var(--custom)'
+};
+
+function toggleFilterPanel(tab) {
+  const panel = document.getElementById(tab === 'schedule' ? 'scheduleFilterPanel' : 'myFilterPanel');
+  const isOpen = panel.classList.toggle('open');
+  if (isOpen) renderFilterPanel(tab);
+  updateFilterBtnState(tab);
+  updateFiltersHeight(tab === 'schedule' ? 'schedule' : 'my', tab === 'schedule' ? 'schedule-filters-height' : 'my-filters-height');
 }
 
-function renderGameFilters() {
-  const container = document.getElementById('gameFilters');
+function renderFilterPanel(tab) {
+  const panel = document.getElementById(tab === 'schedule' ? 'scheduleFilterPanel' : 'myFilterPanel');
+  const filters = tab === 'schedule' ? state.gameFilters : state.myGameFilters;
   const hasCustom = loadCustomEvents().length > 0;
-  const visibleGames = GAMES.filter(g => g !== 'Custom' || hasCustom);
-  container.innerHTML = visibleGames.map(g =>
-    `<button class="filter-chip ${g === state.gameFilter ? 'active' : ''}" data-game="${g}" onclick="setGameFilter('${g}')">${GAME_LABELS[g]}</button>`
-  ).join('');
+  const games = GAMES.filter(g => g !== 'all' && (g !== 'Custom' || hasCustom));
+
+  let html = '<div class="filter-panel-header"><span>Games</span>';
+  html += filters.size > 0
+    ? '<button onclick="clearGameFilters(\'' + tab + '\')">Clear</button>'
+    : '<span style="font-size:12px; color:var(--text-tertiary);">Showing all</span>';
+  html += '</div><div class="filter-game-grid">';
+
+  games.forEach(g => {
+    const checked = filters.has(g) ? 'checked' : '';
+    html += `<div class="filter-game-option ${checked}" onclick="toggleGameFilter('${tab}','${g}')" style="color:${GAME_COLORS[g] || 'var(--blizzard)'}">
+      <div class="filter-game-checkbox"></div>
+      <div class="filter-game-dot" style="background:${GAME_COLORS[g] || 'var(--blizzard)'}"></div>
+      <div class="filter-game-name">${GAME_LABELS[g]}</div>
+    </div>`;
+  });
+  html += '</div>';
+
+  if (tab === 'my') {
+    html += '<div class="filter-divider"></div><div class="filter-toggles">';
+    html += `<div class="filter-toggle-option ${state.mustDoOnly ? 'checked' : ''}" onclick="toggleMustDoFilter()">
+      <div class="filter-toggle-switch"></div> Must Do Only
+    </div>`;
+    html += `<div class="filter-toggle-option ${state.showFreeTime ? 'checked' : ''}" onclick="toggleFreeTime()">
+      <div class="filter-toggle-switch"></div> Free Time
+    </div>`;
+    html += '</div>';
+  }
+
+  panel.innerHTML = html;
+}
+
+function toggleGameFilter(tab, game) {
+  const filters = tab === 'schedule' ? state.gameFilters : state.myGameFilters;
+  if (filters.has(game)) filters.delete(game);
+  else filters.add(game);
+  renderFilterPanel(tab);
+  updateFilterBtnState(tab);
+  if (tab === 'schedule') renderSchedule();
+  else renderMySchedule();
+}
+
+function clearGameFilters(tab) {
+  if (tab === 'schedule') state.gameFilters.clear();
+  else state.myGameFilters.clear();
+  renderFilterPanel(tab);
+  updateFilterBtnState(tab);
+  if (tab === 'schedule') renderSchedule();
+  else renderMySchedule();
+}
+
+function getActiveFilterCount(tab) {
+  const gameCount = tab === 'schedule' ? state.gameFilters.size : state.myGameFilters.size;
+  if (tab === 'my') return gameCount + (state.mustDoOnly ? 1 : 0) + (state.showFreeTime ? 1 : 0);
+  return gameCount;
+}
+
+function updateFilterBtnState(tab) {
+  const btn = document.getElementById(tab === 'schedule' ? 'scheduleFilterBtn' : 'myFilterBtn');
+  const count = getActiveFilterCount(tab);
+  const hasFilters = count > 0;
+  btn.classList.toggle('has-filters', hasFilters);
+  const countEl = btn.querySelector('.filter-count');
+  if (hasFilters) {
+    if (countEl) countEl.textContent = count;
+    else btn.insertAdjacentHTML('beforeend', `<span class="filter-count">${count}</span>`);
+  } else if (countEl) {
+    countEl.remove();
+  }
 }
 
 function updateFiltersHeight(tabId, varName) {
   const bar = document.querySelector('#tab-' + tabId + ' .filters-bar');
-  if (bar) document.documentElement.style.setProperty('--' + varName, bar.offsetHeight + 'px');
+  const panel = document.querySelector('#tab-' + tabId + ' .filter-panel');
+  const barH = bar ? bar.offsetHeight : 0;
+  const panelH = panel && panel.classList.contains('open') ? panel.offsetHeight : 0;
+  document.documentElement.style.setProperty('--' + varName, barH + 'px');
+  document.documentElement.style.setProperty('--' + varName + '-panel', panelH + 'px');
 }
 
 function renderSchedule() {
   updateFiltersHeight('schedule', 'schedule-filters-height');
-  const searchQuery = (document.getElementById('inlineSearch')?.value || '').toLowerCase().trim();
+  const searchQuery = (document.getElementById('headerSearch')?.value || '').toLowerCase().trim();
   const filtered = SESSIONS.filter(s => {
     if (state.day !== 'all' && s.day !== state.day) return false;
-    if (state.gameFilter !== 'all' && s.game !== state.gameFilter) return false;
+    if (state.gameFilters.size > 0 && !state.gameFilters.has(s.game)) return false;
     if (searchQuery && !s.title.toLowerCase().includes(searchQuery) && !s.description.toLowerCase().includes(searchQuery) && !s.stage.toLowerCase().includes(searchQuery) && !s.game.toLowerCase().includes(searchQuery)) return false;
     return true;
   }).sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
@@ -843,31 +1027,21 @@ function setMyDay(day) {
   renderMySchedule();
 }
 
-function setMyGameFilter(game) {
-  state.myGameFilter = game;
-  document.querySelectorAll('#myGameFilters .filter-chip').forEach(c => c.classList.toggle('active', c.dataset.game === game));
-  renderMySchedule();
-}
-
-function renderMyGameFilters() {
-  const container = document.getElementById('myGameFilters');
-  const favGames = new Set(SESSIONS.filter(s => state.favorites.has(s._uid)).map(s => s.game));
-  if (favGames.size < 2) { container.innerHTML = ''; return; }
-  if (!favGames.has(state.myGameFilter)) state.myGameFilter = 'all';
-  const visible = ['all', ...GAMES.filter(g => g !== 'all' && favGames.has(g))];
-  container.innerHTML = visible.map(g =>
-    `<button class="filter-chip ${g === state.myGameFilter ? 'active' : ''}" data-game="${g}" onclick="setMyGameFilter('${g}')">${GAME_LABELS[g]}</button>`
-  ).join('');
-}
-
 function toggleFreeTime() {
   state.showFreeTime = !state.showFreeTime;
-  document.getElementById('freeTimeBtn').classList.toggle('active', state.showFreeTime);
+  const panel = document.getElementById('myFilterPanel');
+  if (panel.classList.contains('open')) renderFilterPanel('my');
+  updateFilterBtnState('my');
   renderMySchedule();
 }
 
-function calcFreeBlocks(dayFilter) {
-  const allFavs = SESSIONS.filter(s => state.favorites.has(s._uid))
+function calcFreeBlocks(dayFilter, priorityFilter) {
+  const allFavs = SESSIONS.filter(s => {
+      if (!state.favorites.has(s._uid)) return false;
+      if (priorityFilter === 'mustdo' && !state.mustDos.has(s._uid)) return false;
+      if (priorityFilter === 'favorites' && state.mustDos.has(s._uid)) return false;
+      return true;
+    })
     .filter(s => dayFilter === 'all' || s.day === dayFilter)
     .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
   const blocks = [];
@@ -937,12 +1111,23 @@ function renderFreeCard(block) {
   </div>`;
 }
 
+function toggleMustDoFilter() {
+  state.mustDoOnly = !state.mustDoOnly;
+  const panel = document.getElementById('myFilterPanel');
+  if (panel.classList.contains('open')) renderFilterPanel('my');
+  updateFilterBtnState('my');
+  renderMySchedule();
+}
+
 function renderMySchedule() {
-  renderMyGameFilters();
   updateFiltersHeight('my', 'my-filters-height');
-  const favSessions = SESSIONS.filter(s => state.favorites.has(s._uid))
+  const favSessions = SESSIONS.filter(s => {
+      if (!state.favorites.has(s._uid)) return false;
+      if (state.mustDoOnly && !state.mustDos.has(s._uid)) return false;
+      return true;
+    })
     .filter(s => state.myDay === 'all' || s.day === state.myDay)
-    .filter(s => state.myGameFilter === 'all' || s.game === state.myGameFilter)
+    .filter(s => state.myGameFilters.size === 0 || state.myGameFilters.has(s.game))
     .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
 
   const container = document.getElementById('myScheduleList');
@@ -955,7 +1140,7 @@ function renderMySchedule() {
     return;
   }
 
-  const freeBlocks = state.showFreeTime ? calcFreeBlocks(state.myDay) : [];
+  const freeBlocks = state.showFreeTime ? calcFreeBlocks(state.myDay, state.mustDoOnly ? 'mustdo' : 'all') : [];
   const items = [...favSessions.map(s => ({...s})), ...freeBlocks]
     .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
 
@@ -1059,16 +1244,25 @@ function renderNowNext() {
 
 // ── Favorites ──
 function toggleFavorite(uid) {
-  if (state.favorites.has(uid)) {
+  if (state.mustDos.has(uid)) {
+    state.mustDos.delete(uid);
     state.favorites.delete(uid);
     clearNotificationTimer(uid);
+  } else if (state.favorites.has(uid)) {
+    state.mustDos.add(uid);
   } else {
     state.favorites.add(uid);
     scheduleNotification(uid);
+    try {
+      if (!localStorage.getItem('blizzcon-mustdo-hint')) {
+        localStorage.setItem('blizzcon-mustdo-hint', '1');
+        showToast('Tap the star again to mark as Must Do');
+      }
+    } catch(e) {}
   }
   saveFavorites();
+  saveMustDos();
 
-  // Re-render current view
   if (state.tab === 'schedule') renderSchedule();
   else if (state.tab === 'my') renderMySchedule();
   else if (state.tab === 'now') renderNowNext();
@@ -1079,7 +1273,9 @@ function clearAllFavorites() {
   if (!confirm('Clear all favorites?')) return;
   Object.keys(state.notificationTimers).forEach(clearNotificationTimer);
   state.favorites.clear();
+  state.mustDos.clear();
   saveFavorites();
+  saveMustDos();
   renderMySchedule();
   showToast('All favorites cleared');
 }
@@ -1167,7 +1363,6 @@ function saveCustomEvent() {
     }
   }
   closeCustomForm();
-  renderGameFilters();
   switchTab('my');
   showToast(editId ? 'Event updated' : 'Event added to your schedule');
 }
@@ -1192,6 +1387,7 @@ function openDetail(uid) {
   const session = SESSIONS.find(s => s._uid === uid);
   if (!session) return;
   const starred = state.favorites.has(uid);
+  const isMustDo = state.mustDos.has(uid);
   const conflicts = starred ? getConflicts(uid) : [];
   const stageLabel = session._allStages ? 'Simulcast — All Stages' : session.stage + ' · ' + session.stageLocation;
 
@@ -1215,8 +1411,8 @@ function openDetail(uid) {
       <textarea id="modalNoteInput" placeholder="Add a personal note..." onblur="saveNote('${uid}', this.value); if(state.tab==='schedule')renderSchedule(); else if(state.tab==='my')renderMySchedule(); else if(state.tab==='now')renderNowNext();">${esc(state.notes[uid] || '')}</textarea>
     </div>
     <div class="modal-actions">
-      <button class="btn-star ${starred ? 'starred' : ''}" onclick="toggleFavorite('${uid}'); openDetail('${uid}');">
-        ${starred ? '★ In My Schedule' : '☆ Add to Schedule'}
+      <button class="btn-star ${isMustDo ? 'must-do' : starred ? 'starred' : ''}" onclick="toggleFavorite('${uid}'); openDetail('${uid}');">
+        ${isMustDo ? '★ Must Do' : starred ? '★ In My Schedule' : '☆ Add to Schedule'}
       </button>
       ${session.id.startsWith('custom-') ? `<button class="btn-close-modal" onclick="closeModal(); openCustomForm('${session.id}')">Edit</button><button class="btn-close-modal" style="color:var(--conflict);" onclick="deleteCustomEvent('${session.id}')">Delete</button>` : ''}
       <button class="btn-close-modal" onclick="closeModal()">Close</button>
@@ -1230,6 +1426,19 @@ function closeModal(e) {
 }
 
 // ── Search ──
+function toggleSearch() {
+  const header = document.querySelector('.app-header');
+  const input = document.getElementById('headerSearch');
+  if (header.classList.contains('searching')) {
+    header.classList.remove('searching');
+    input.value = '';
+    renderSchedule();
+  } else {
+    header.classList.add('searching');
+    input.focus();
+  }
+}
+
 function handleInlineSearch() {
   renderSchedule();
 }
@@ -1301,8 +1510,8 @@ function startLiveUpdates() {
 
 // ── Init ──
 loadFavorites();
+loadMustDos();
 loadNotes();
-renderGameFilters();
 renderSchedule();
 startLiveUpdates();
 
@@ -1316,7 +1525,8 @@ if ('Notification' in window && Notification.permission === 'granted') {
 // Handle escape key for modals
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
-    if (document.getElementById('customFormBackdrop').classList.contains('open')) closeCustomForm();
+    if (document.querySelector('.app-header').classList.contains('searching')) toggleSearch();
+    else if (document.getElementById('customFormBackdrop').classList.contains('open')) closeCustomForm();
     else if (document.getElementById('modalBackdrop').classList.contains('open')) closeModal();
   }
 });
