@@ -568,6 +568,14 @@ body {
 }
 .app-footer a:hover { text-decoration: underline; }
 
+.tz-note {
+  text-align: center; font-size: 11px; color: var(--text-muted);
+  padding: 6px 16px 2px; letter-spacing: 0.02em;
+}
+.form-hint {
+  font-size: 11px; color: var(--text-muted); margin-top: -8px; margin-bottom: 14px;
+}
+
 /* Utility */
 .hidden { display: none !important; }
 </style>
@@ -597,6 +605,7 @@ body {
         </div>
       </div>
       <div class="filter-panel" id="scheduleFilterPanel"></div>
+      <div class="tz-note" id="tzNote"></div>
       <div id="scheduleList"></div>
     </div>
 
@@ -677,6 +686,7 @@ body {
           <input type="time" id="customEnd" value="13:00">
         </div>
       </div>
+      <div class="form-hint" id="customTzHint"></div>
       <div class="form-group">
         <label>Location (optional)</label>
         <input type="text" id="customLocation" placeholder="e.g. Grand Plaza, Hall B">
@@ -1535,6 +1545,12 @@ function startLiveUpdates() {
     if (state.tab === 'now') renderNowNext();
   }, 1000);
 }
+
+// ── Timezone label ──
+const _tzAbbr = new Intl.DateTimeFormat(undefined, { timeZoneName: 'short' })
+  .formatToParts(new Date()).find(p => p.type === 'timeZoneName')?.value || 'your timezone';
+document.getElementById('tzNote').textContent = 'All times shown in your timezone (' + _tzAbbr + ')';
+document.getElementById('customTzHint').textContent = 'Enter time in your current timezone (' + _tzAbbr + '). It will adjust if you travel.';
 
 // ── Init ──
 loadFavorites();
