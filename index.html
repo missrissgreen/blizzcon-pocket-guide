@@ -1246,12 +1246,21 @@ function renderNowNext() {
 }
 
 // ── Favorites ──
+const _demoted = new Set();
 function toggleFavorite(uid) {
   if (state.mustDos.has(uid)) {
     state.mustDos.delete(uid);
+    _demoted.add(uid);
   } else if (state.favorites.has(uid)) {
-    state.mustDos.add(uid);
+    if (_demoted.has(uid)) {
+      state.favorites.delete(uid);
+      _demoted.delete(uid);
+      clearNotificationTimer(uid);
+    } else {
+      state.mustDos.add(uid);
+    }
   } else {
+    _demoted.delete(uid);
     state.favorites.add(uid);
     scheduleNotification(uid);
     try {
